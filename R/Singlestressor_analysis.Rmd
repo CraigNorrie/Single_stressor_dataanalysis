@@ -1,0 +1,194 @@
+---
+title: "Data analysis of laboratroy experiments on diploid and triploid pacific oysters"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is a notebook for the analysis of growth, motality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters. 
+
+# Packages
+
+```{r, results='hide'}
+library(tidyverse)
+library(here)
+library(gridExtra)
+library(lme4)
+library(emmeans)
+```
+
+# Temperature
+
+## Growth
+
+Read in and prepare the data
+```{r}
+sizedat_temp <- read.csv(here("Data", "Temperature", "Size_Temperature.csv"))
+sizedat_temp <- sizedat_temp %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time", "Tag.colour", "Tag.num"), as.factor)) 
+
+```
+
+Plot the size distributions of each of the ploidy groups at the start and the end of the experiment
+```{r}
+grid.arrange(
+  sizedat_temp %>% ggplot(aes(x=Ploidy, y = Shell.Height, fill = Time))+geom_violin()+
+    xlab("Ploidy")+ylab("Shell height (mm)")+theme_classic(),
+  
+  sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_violin()+
+    xlab("Ploidy")+ylab("Mass (g)")+theme_classic()
+)
+
+```
+
+Conduct a linear mixed model to examine if there was a difference in the size of individuals at the start of the experiment and at the end. Will include each tank as a random factor. I will use the lme4 package for this.
+
+Check the distribution of the data
+```{r}
+hist((sizedat_temp$Mass))
+hist((sizedat_temp$Shell.Height))
+```
+
+and the distribution of log transfomed data
+```{r}
+hist(log(sizedat_temp$Mass))
+hist(log(sizedat_temp$Shell.Height))
+```
+
+Develop the model for size and print the contrasts and p values using emmeans package
+```{r}
+massgrowthlme_temp <- lmer(Mass~Ploidy*Time*Treatment+ (1|Tank), data = sizedat_temp)
+emmeans_massgrowthlme_temp <- emmeans(massgrowthlme_temp, ~ Ploidy+Treatment+Time)
+contrast(emmeans_massgrowthlme_temp)
+
+heightgrowthlme_temp <- lmer(Shell.Height~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
+```
+
+## Mortality
+
+Read in the mortality data and prepare it for analysis
+
+```{r, results='hide'}
+temp_mortdat <- read.csv(here("Data", "Temperature", "Mortality_Temperature.csv"))
+str(temp_mortdat) #inspect the data
+sizedat_temp <- sizedat_temp %>% #Correct the data structure
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time", "Tag.colour", "Tag.num"), as.factor)) 
+
+```
+
+# pH
+
+## Growth
+
+## Mortality
+
+Read in the mortality data and prepare it for analysis. This involves changing the data from being only number of mortalities at each sampling event to giving each individual a status. This is a lot of code to do not very much
+
+```{r}
+pH_mortdat <- read.csv(here("Data", "pH", "pH_mortality.csv"))
+pH_mortdattemplate <- read.csv(here("Data", "pH", "Mortality_template.csv"))
+#merge the data with the tempalate
+ph_mortdat_expanded <- left_join(pH_mortdattemplate, pH_mortdat, by = c("Tank", "Date", "Colour"))
+#Replace the NAs with zeros
+ph_mortdat_expanded <- ph_mortdat_expanded %>% mutate_all(~ifelse(is.na(.), 0, .))
+#Now need to pivot wider to get the dates so we can subtract the dates
+ph_mortdat_expanded <- ph_mortdat_expanded %>% pivot_wider(id_cols = c(Tank, Colour),
+                                                           names_from='Date',
+                                                           values_from='Number_Morts')
+#Add a new collumn that has the total number per group at the start of the experiment (Think it was 15)
+ph_mortdat_expanded$Survivors_Nov_2 <- 15-ph_mortdat_expanded$Nov_02
+
+#calculate survivors at each time interval 
+for (i in 4:10) {
+  survivors <- ph_mortdat_expanded[, i+7] - ph_mortdat_expanded[, i]
+  # Create new column name
+  new_column_name <- paste0("Survivors_", colnames(ph_mortdat_expanded)[i])
+  # Add new column with survivors
+  ph_mortdat_expanded[, new_column_name] <- survivors
+}
+
+#now I need to create a df with 15 rows for each of the tanks and ploidys
+ph_mortdat_expanded_repeated <- ph_mortdat_expanded %>%
+  mutate(row_id = row_number()) %>%
+  slice(rep(row_id, each = 15)) %>% 
+  select(1,2)
+#Now add in an id column where we repeat 1-15 for each tank
+ph_mortdat_expanded_repeated$ID <- rep(1:15, length.out = nrow(ph_mortdat_expanded_repeated))
+#add a status for the start of teh experiment, 0 indicates an indivvidual was alive 
+ph_mortdat_expanded_repeated$status_Sep_30 <- 0
+
+#Create a df to store all survival event data for analyes
+survival_eventdat <- ph_mortdat_expanded_repeated
+
+#create a for loop that gives all survivors a status across all
+for (i in 11:18) {
+  # Extract the current column name
+  current_column_name <- colnames(ph_mortdat_expanded)[i]
+  
+  # Remove "Survivors_" from the current column name
+  stripped_column_name <- gsub("Survivors_", "", current_column_name)
+  
+  # Create a new column name based on the stripped current column name
+  new_column_name <- paste0("status_", stripped_column_name)
+  
+  # Uncount the specified column
+  survivors_column <- ph_mortdat_expanded[c(1:2, i)] %>%
+    mutate(weights = as.numeric(get(current_column_name))) %>%
+    uncount(weights)
+  
+  # Add an ID column from 1 to 15
+  survivors_column <- survivors_column %>%
+    group_by(across(c(1, 2))) %>%
+    mutate(ID = row_number()) %>%
+    ungroup()
+  
+  # Add a status column to indicate that these individuals are alive
+  survivors_column[[new_column_name]] <- 0
+  
+  # Join the data frames
+  survival_eventdat <- left_join(survival_eventdat, survivors_column, by = c("Tank", "Colour", "ID"))
+}
+#Only keep the status columns
+survival_eventdat <- survival_eventdat %>% 
+  select(-starts_with("Survivors_"))
+#Pivot the data longer to the correct format for survival analyses in R
+survival_eventdat <- survival_eventdat %>% 
+  pivot_longer(cols=c(4:12),
+               names_to = "Date",
+               values_to = "event") %>% 
+  mutate(Date = str_replace(Date, "status_", "")) %>% #remove the word status from the name column
+  mutate(Date = str_replace(Date, "Nov_", "")) %>% #replace date with experiment day
+  mutate(Date = str_replace(Date, "Sep_30", "0")) %>% #replace Sep 30 with day 0
+  mutate(Date = ifelse(Date == 2, "02", Date)) #replace 2 with 02
+
+#Set the status to 1 when theree is a death (i.e. when status is NA)
+survival_eventdat <- survival_eventdat %>% 
+  mutate(event = ifelse(is.na(event), 1, event))
+
+#I only want to keep the first instance of a 1 for each individual.
+survival_eventdat <- survival_eventdat %>%
+  group_by(ID) %>%
+  mutate(event = replace(event, cumsum(event == 1) > 1, NA)) %>% 
+  mutate(event = ifelse(event == 0 | cumsum(event == 1) == 1, event, 0)) %>% 
+  filter(event != "NA")#Remove all NAs
+#Add a treatment column to each of the tanks
+#read in my excel sheet of tank assignments
+pH_tank_assignments <- read.csv(here("Data", "pH", "pH_Tank_assignments.csv"))
+#Add them as a treatment column to the survivor data
+survival_eventdat1 <- merge(survival_eventdat, pH_tank_assignments, by = "Tank")
+
+
+```
+
+### Plot the data to visualise mortality between tanks
+
+
+## Respiration
+
+# DO 
+
+## Growth
+
+## Mortality
+
+## Respiration
