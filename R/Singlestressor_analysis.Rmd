@@ -171,6 +171,7 @@ pooled_site_survplot_temp_pooled <- survival_eventdat_temp %>%
   scale_fill_manual(values = c("blue", "green", "red"))
 pooled_site_survplot_temp_pooled
 ```
+
 Plot the survival across tanks
 
 ```{r, echo=FALSE}
@@ -412,5 +413,14 @@ I am going to add a random effect of tank here to assess inter tank variation. I
 ## Growth
 
 ## Mortality
+
+Read in the mortality data, and format it so that I can run survival analyses. 
+```{r}
+DO_mortdat <- read.csv(here("Data", "DO", "DO_morts.csv"))
+DO_tank_assignments <- read.csv(here("Data", "DO", "DO_Tank_assignments.csv"))
+
+
+
+```
 
 ## Respiration
