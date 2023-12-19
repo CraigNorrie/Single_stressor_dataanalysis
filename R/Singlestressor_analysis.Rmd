@@ -337,6 +337,7 @@ pooled_site_survplot_pH_pooled
 ```
 
 Here I am going to see how different ploidies reacted to the same pH treatment. The same data as above (i.e. pooled) but faceted by ploidy rather than CO2
+
 ```{r, echo=FALSE}
 pooled_site_survplot_pH_ploidy <- survival_eventdat_pH %>% 
  ggsurvplot_facet(survfit(Surv(Date, event, type = "right") ~ CO2_level , data = .),
@@ -381,8 +382,6 @@ pooled_site_survplot_pH_tank
 First I am going to do a pooled analysis on all the data. This does not include a random effect of tank which I will include later. Using a cox proportional hazards model based on the analysis of McElhany. 
 
 ```{r, echo=FALSE}
-#There seem to be 70 moralities missing from the events. Where are they?
-
 #Create a survival object for analyses
 surv <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
 #Create the survival models
@@ -400,10 +399,17 @@ summary(K4)
 
 Results of these analyses show that there was as significant impact of pCO2 and ploidy on survival (when pooled). Significant interactions existed between ploidy and pCO2 levels. The graphs show that blue did not survive well in the highest pH treatement. 
 
-I am going to add a random effect of tank here to assess inter tank variation. I am using the frailtyEM package (Balan and Putter 2019) as in McElhany. I am going to include treatment and ploidy as fixed effects tank as a random effect. 
+I am going to add a random effect of tank here to assess inter tank variation. I am using the frailtyEM package (Balan and Putter 2019) as in McElhany crab survival analysis. I am going to include treatment and ploidy as fixed effects tank as a random effect. I have no idea if this is correct or how to interpret it. 
 
 ```{r}
+survival_eventdat_pH1 <- survival_eventdat_pH %>% mutate(across(c("CO2_level","Tank", "Colour"), as.factor)) 
+survival_eventdat_pH1$Time <- as.numeric(survival_eventdat_pH1$Time)
+survival_eventdat_pH1$Time <- survival_eventdat_pH1$Time+1
+pH_frailty_fit <- survival_eventdat_pH1 %>% emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank),
+distribution = emfrail_dist(dist = "gamma"),
+data = .)
 
+pH_frailty_fit %>% gt()
 ```
 
 ## Respiration
