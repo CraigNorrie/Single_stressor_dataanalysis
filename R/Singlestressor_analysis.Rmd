@@ -409,7 +409,6 @@ pH_frailty_fit <- survival_eventdat_pH1 %>% emfrail(Surv(Time, event, type = "ri
 distribution = emfrail_dist(dist = "gamma"),
 data = .)
 
-pH_frailty_fit %>% gt()
 ```
 
 ## Respiration
