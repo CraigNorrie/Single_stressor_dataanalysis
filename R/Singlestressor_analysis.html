@@ -1779,10 +1779,19 @@ This shows pooled mortality across temperature treatments</p>
 </div>
 <div id="respiration" class="section level2">
 <h2>Respiration</h2>
+<p><a href="https://doi.org/10.3389/fmars.2020.00399">Ding et al
+2020</a> and <a href="https://www.frontiersin.org/articles/10.3389/fmars.2023.1194296/full">Bodenstein</a>
+used ANOVAs to compare respiration rates.I will do a linear mixed model
+where I examine interactions between the environment, ploidy, and
+whether a heat shock or not has occured. I will include tank as a random
+factor to account for any potential between tank variation.</p>
+<p>Read in the respiration data</p>
+<pre class="r"><code>#make the rates column positive</code></pre>
+<p>Calculate an oxygen consumption rate per gram per gram. This is to
+determine if smaller/larger individuals consume more oxygen per gram
+when they are smaller/larger. Similar to <a href="https://www.sciencedirect.com/science/article/pii/S0022098122000892?via%3Dihub">McElhany
+et al. 2023</a> # pH</p>
 </div>
-</div>
-<div id="ph" class="section level1">
-<h1>pH</h1>
 <div id="growth-1" class="section level2">
 <h2>Growth</h2>
 <p>There was a lot of mortality across the tanks so this may be hard to
@@ -2028,6 +2037,35 @@ pooled_site_survplot_DO_pooled_tank</code></pre>
 </div>
 <div id="respiration-2" class="section level2">
 <h2>Respiration</h2>
+<p>Read in the respiration data</p>
+<pre class="r"><code>DO_respdat &lt;- read.csv(here(&quot;Data&quot;, &quot;DO&quot;, &quot;DO_resprates.csv&quot;)) %&gt;% 
+  select(Tank, Ploidy, Treatment, Oyster.tissue.dry.mass, masscorrectedrate) %&gt;% #just select the relevant columns
+  rename(drymass = Oyster.tissue.dry.mass)#rename drymass column
+#make the rates column positive
+DO_respdat$masscorrectedrate &lt;- DO_respdat$masscorrectedrate*-1
+#for some reason there are 3C individuals in here. These are really 3C&#39;s so I&#39;ll replace them with 3C
+DO_respdat &lt;- DO_respdat %&gt;% mutate(Ploidy = case_when(
+    Ploidy == &quot;2C&quot; ~ &quot;3C&quot;,
+    TRUE ~ Ploidy  # Keep other values unchanged
+  ))
+#Remove the single value that does not have a ploidy
+DO_respdat &lt;- DO_respdat %&gt;% filter(Ploidy != &quot;&quot;)</code></pre>
+<p>Calculate an oxygen consumption rate per gram per gram.</p>
+<pre class="r"><code>DO_respdat$O2gramgram &lt;- DO_respdat$masscorrectedrate/DO_respdat$drymass</code></pre>
+<div id="overview-of-the-data" class="section level3">
+<h3>Overview of the data</h3>
+<p>Create a summary table of the data</p>
+<pre class="r"><code>DO_resp_summarytable &lt;- DO_respdat %&gt;% filter(masscorrectedrate != &quot;NA&quot;) %&gt;% 
+  group_by(Ploidy, Treatment) %&gt;% 
+  summarise(n=n(), mean_rate=mean(masscorrectedrate), SEMrate=sd(masscorrectedrate)/sqrt(n()))</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;Ploidy&#39;. You can override using the
+## `.groups` argument.</code></pre>
+<p>Create physiological performance curves. Start for the non heat
+shocked individuals. For these analyses and plots I was unable to
+achieve 100% oxygen saturation so I am removing the 100% treatment from
+analyses.</p>
+<p>Start the statistical analyses</p>
+</div>
 </div>
 </div>
 

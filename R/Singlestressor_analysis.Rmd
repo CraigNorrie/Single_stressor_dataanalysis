@@ -213,8 +213,15 @@ pooled_site_survplot_temp_Ploidy
 ```
 
 ## Respiration
+[Ding et al 2020](https://doi.org/10.3389/fmars.2020.00399) and [Bodenstein](https://www.frontiersin.org/articles/10.3389/fmars.2023.1194296/full) used ANOVAs to compare respiration rates.I will do a linear mixed model where I examine interactions between the environment, ploidy, and whether a heat shock or not has occured. I will include tank as a random factor to account for any potential between tank variation. 
 
+Read in the respiration data
 
+```{r}
+#make the rates column positive
+```
+
+Calculate an oxygen consumption rate per gram per gram. This is to determine if smaller/larger individuals consume more oxygen per gram when they are smaller/larger. Similar to [McElhany et al. 2023](https://www.sciencedirect.com/science/article/pii/S0022098122000892?via%3Dihub)
 # pH
 
 ## Growth
@@ -530,3 +537,71 @@ Facet by ploidy
 
 
 ## Respiration
+
+Read in the respiration data
+
+```{r}
+DO_respdat <- read.csv(here("Data", "DO", "DO_resprates.csv")) %>% 
+  select(Tank, Ploidy, Treatment, Oyster.tissue.dry.mass, masscorrectedrate) %>% #just select the relevant columns
+  rename(drymass = Oyster.tissue.dry.mass)#rename drymass column
+#make the rates column positive
+DO_respdat$masscorrectedrate <- DO_respdat$masscorrectedrate*-1
+#for some reason there are 3C individuals in here. These are really 3C's so I'll replace them with 3C
+DO_respdat <- DO_respdat %>% mutate(Ploidy = case_when(
+    Ploidy == "2C" ~ "3C",
+    TRUE ~ Ploidy  # Keep other values unchanged
+  ))
+#Remove the single value that does not have a ploidy
+DO_respdat <- DO_respdat %>% filter(Ploidy != "")
+
+```
+
+Calculate an oxygen consumption rate per gram per gram. 
+
+```{r}
+DO_respdat$O2gramgram <- DO_respdat$masscorrectedrate/DO_respdat$drymass
+```
+
+
+### Overview of the data
+
+Create a summary table of the data
+
+```{r}
+DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>% 
+  group_by(Ploidy, Treatment) %>% 
+  summarise(n=n(), mean_rate=mean(masscorrectedrate), SEMrate=sd(masscorrectedrate)/sqrt(n()),
+            mean_rate_gramgram=mean(O2gramgram), SEMgramgram=sd(O2gramgram)/sqrt(n()))
+```
+
+Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.
+
+```{r}
+DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
+  filter(Treatment != "100") %>% 
+  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line()+
+  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate))
+
+#Create the same graph with standardised again by gram. This is not really that informative
+# DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
+#   filter(Treatment != "100") %>% 
+#   ggplot(aes(x=Treatment, y= mean_rate_gramgram, group = Ploidy, colour = Ploidy))+geom_line()+
+#   geom_errorbar(aes(ymin=mean_rate_gramgram-SEMgramgram, ymax=mean_rate_gramgram+SEMgramgram))
+
+```
+
+Physiological curves for heat shocked individuals. 
+```{r}
+DO_resp_summarytable %>% filter(Treatment == "80HS" | Treatment == "60HS" | Treatment =="20HS") %>% 
+  filter(Treatment != "100") %>% 
+  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line()+
+  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate))
+
+```
+
+
+### statistical analyses
+```{r}
+
+```
+
