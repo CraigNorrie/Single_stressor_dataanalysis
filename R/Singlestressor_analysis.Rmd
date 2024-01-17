@@ -578,10 +578,10 @@ DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>%
             mean_rate_gramgram=mean(O2gramgram), SEMgramgram=sd(O2gramgram)/sqrt(n()))
 ```
 
-Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.
+Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.Physiological curves for heat shocked individuals. 
 
 ```{r}
-DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
+PhyscurvDO <- DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
   filter(Treatment != "100") %>% 
   ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+#base graph
   geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate), width = 0.2, size = 0.5)+ #error bars
@@ -597,17 +597,17 @@ DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Trea
 
 ```
 
-Physiological curves for heat shocked individuals. 
+
 
 ```{r}
-DO_resp_summarytable %>% filter(Treatment == "80HS" | Treatment == "60HS" | Treatment =="20HS") %>% 
+PhyscurvDOHS <- DO_resp_summarytable %>% filter(Treatment == "80HS" | Treatment == "60HS" | Treatment =="20HS") %>% 
   filter(Treatment != "100") %>% 
   ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+
   geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate), width = 0.2, size = 0.5)+
   ylim(0,5.3)+
   theme_classic(base_size = 15)+ylab("Mean oxygen consumption rate (µmol g-1 h-1 ± SEM)")+
   xlab("Oxygen concentration")+scale_color_brewer(palette = "Dark2")
-
+grid.arrange(PhyscurvDO, PhyscurvDOHS)
 ```
 
 
