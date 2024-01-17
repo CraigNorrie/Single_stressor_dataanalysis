@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-This is a notebook for the analysis of growth, motality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters. 
+This is a notebook for the analysis of growth, motality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters.
 
 # Packages
 
@@ -47,6 +47,9 @@ grid.arrange(
 )
 
 ```
+
+Plot growth throughout the experiment
+
 
 Conduct a linear mixed model to examine if there was a difference in the size of individuals at the start of the experiment and at the end. Will include each tank as a random factor. I will use the lme4 package for this.
 
@@ -542,8 +545,9 @@ Read in the respiration data
 
 ```{r}
 DO_respdat <- read.csv(here("Data", "DO", "DO_resprates.csv")) %>% 
-  select(Tank, Ploidy, Treatment, Oyster.tissue.dry.mass, masscorrectedrate) %>% #just select the relevant columns
-  rename(drymass = Oyster.tissue.dry.mass)#rename drymass column
+  select(Tank, Ploidy, Treatment, Oyster.tissue.dry.mass, masscorrectedrate, rate) %>% #just select the relevant columns
+  rename(drymass = Oyster.tissue.dry.mass) %>% #rename drymass column
+  filter(masscorrectedrate > -100)
 #make the rates column positive
 DO_respdat$masscorrectedrate <- DO_respdat$masscorrectedrate*-1
 #for some reason there are 3C individuals in here. These are really 3C's so I'll replace them with 3C
@@ -579,8 +583,11 @@ Create physiological performance curves. Start for the non heat shocked individu
 ```{r}
 DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
   filter(Treatment != "100") %>% 
-  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line()+
-  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate))
+  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+#base graph
+  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate), width = 0.2, size = 0.5)+ #error bars
+  ylim(0,5.3)+
+  theme_classic(base_size = 15)+ylab("Mean oxygen consumption rate (µmol g-1 h-1 ± SEM)")+
+  xlab("Oxygen concentration")+scale_color_brewer(palette = "Dark2")
 
 #Create the same graph with standardised again by gram. This is not really that informative
 # DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
@@ -591,17 +598,46 @@ DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Trea
 ```
 
 Physiological curves for heat shocked individuals. 
+
 ```{r}
 DO_resp_summarytable %>% filter(Treatment == "80HS" | Treatment == "60HS" | Treatment =="20HS") %>% 
   filter(Treatment != "100") %>% 
-  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line()+
-  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate))
+  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+
+  geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate), width = 0.2, size = 0.5)+
+  ylim(0,5.3)+
+  theme_classic(base_size = 15)+ylab("Mean oxygen consumption rate (µmol g-1 h-1 ± SEM)")+
+  xlab("Oxygen concentration")+scale_color_brewer(palette = "Dark2")
 
 ```
 
 
 ### statistical analyses
-```{r}
 
+Examine the distribution of the data
+```{r}
+hist(DO_respdat$masscorrectedrate)
+```
+
+The data was left skewed so a log transformation was performed
+```{r}
+hist(log(DO_respdat$masscorrectedrate))
+```
+
+The logged data has a much more normal distribution so this will be used in the further analyses. 
+
+I don't have the DF to include the HS individuals within the overall test. Will need to perform a seperate test to see if the O2 consumption on all of these is higher. Can I include an additional HS column with only 2 variables? I think so. 
+
+```{r}
+DOresp_lme <- DO_respdat %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
+  lmer(log(masscorrectedrate)~Ploidy*Treatment + (1|Tank), data=.)
+summary(DOresp_lme)
+```
+
+Print the contrasts in oxygen consumption. CHECK THIS CAREFULLY (16 JAN 2024)
+```{r}
+emmeans_DOresp_lme <- emmeans(DOresp_lme, ~ Ploidy+Treatment)
+DO_resp_contrasts <- contrast(emmeans_DOresp_lme)
+DO_resp_contrastsdf <-  as.data.frame(DO_resp_contrasts)
+print(DO_resp_contrastsdf %>% filter(p.value <=0.05))
 ```
 
