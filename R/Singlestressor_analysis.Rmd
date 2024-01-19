@@ -158,20 +158,23 @@ survival_eventdat_temp <- merge(survival_eventdat_temp, temp_tank_assignments, b
 Now the the data is in the correct format I can ployt the mortality. Beacuse mortality was so low this will not be a very interesting plot. This shows pooled mortality across temperature treatments
 
 ```{r, echo=FALSE}
+survival_eventdat_temp$Temp <- factor(survival_eventdat_temp$Temp, levels = c("7.5", "12.5", "17.5", "22.5", "27.5"))#Set the order for the facets
 pooled_site_survplot_temp_pooled <- survival_eventdat_temp %>% 
+  filter(Time <= 28) %>% 
  ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
             facet.by = "Temp",
             data = .,
-            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
-            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
             xlab = "Time (days)",
-             ylim = c(0.6, 1),
+             ylim = c(0.7, 1),
             legend.strata = FALSE, 
             legend.title = "Ploidy")+
-  theme_bw(base_size = 15)+
+  theme_bw(base_size = 20)+
   labs(legend = "ploidy")+
-  scale_color_manual(values = c("blue", "green", "red"))+
-  scale_fill_manual(values = c("blue", "green", "red"))
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
 pooled_site_survplot_temp_pooled
 ```
 
@@ -208,7 +211,7 @@ pooled_site_survplot_temp_Ploidy <- survival_eventdat_temp %>%
              #ylim = c(0.6, 1),
             legend.strata = FALSE, 
             legend.title = "Ploidy")+
-  theme_bw(base_size = 15)
+  theme_bw(base_size = 20)
   #labs(legend = "ploidy")+
   #scale_color_manual(values = c("blue", "green", "red"))+
   #scale_fill_manual(values = c("blue", "green", "red"))
@@ -329,20 +332,22 @@ survival_eventdat_pH <- merge(survival_eventdat_pH,pH_tanktrt, by = "Tank")
 This plot shows pooled survival across pH treatments. This does not account for any random effects of tank that could influence survival. Just a starting point to get an overview of the data. 
 
 ```{r, echo=FALSE}
+survival_eventdat_pH$CO2_level <- factor(survival_eventdat_pH$CO2_level, levels = c("0", "250", "500", "750", "1000"))#Set the order of the facets 
+survival_eventdat_pH$Date1 <- survival_eventdat_pH$Date+3#The sampling events were off by 1 day
 pooled_site_survplot_pH_pooled <- survival_eventdat_pH %>% 
- ggsurvplot_facet(survfit(Surv(Date, event, type = "right") ~ Colour , data = .),
+ ggsurvplot_facet(survfit(Surv(Date1, event, type = "right") ~ Colour , data = .),
             facet.by = "CO2_level",
             data = .,
-            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
-            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
             xlab = "Time (days)",
-             ylim = c(0.6, 1),
+             ylim = c(0.7, 1),
             legend.strata = FALSE, 
             legend.title = "Ploidy")+
-  theme_bw(base_size = 15)+
+  theme_bw(base_size = 20)+
   labs(legend = "ploidy")+
-  scale_color_manual(values = c("blue", "green", "red"))+
-  scale_fill_manual(values = c("blue", "green", "red"))
+  scale_color_manual(values = c("#CD950C","#00688B", "#8B0A50"))+
+  scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
 pooled_site_survplot_pH_pooled
 ```
 
@@ -499,20 +504,22 @@ survival_eventdat_DO <- merge(survival_eventdat_DO, DO_tank_assignments, by = "T
 Plot the mortality between tanks faceted by DO level
 
 ```{r}
-pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% 
+survival_eventdat_DO$DO <- factor(survival_eventdat_DO$DO, levels = c("20", "40", "60", "80", "100"))#Set#Order the facets
+pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>% 
+  #filter(DO != 100) %>% 
  ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
             facet.by = "DO",
             data = .,
-            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
-            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
             xlab = "Time (days)",
-             ylim = c(0.6, 1),
+             ylim = c(0.7, 1),
             legend.strata = FALSE, 
             legend.title = "Ploidy")+
-  theme_bw(base_size = 15)+
+  theme_bw(base_size = 20)+
   labs(legend = "ploidy")+
-  scale_color_manual(values = c("blue", "green", "red"))+
-  scale_fill_manual(values = c("blue", "green", "red"))
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
 pooled_site_survplot_DO_pooled
 ```
 
