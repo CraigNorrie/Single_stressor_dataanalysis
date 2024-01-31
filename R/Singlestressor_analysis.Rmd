@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-This is a notebook for the analysis of growth, motality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters.
+This is a notebook for the analysis of growth, mortality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters.
 
 # Packages
 
@@ -22,6 +22,7 @@ library(gridExtra)
 library(frailtyEM)
 library(lme4)
 library(emmeans)
+library(nlme)
 ```
 
 # Temperature
@@ -38,14 +39,17 @@ sizedat_temp <- sizedat_temp %>%
 
 Plot the size distributions of each of the ploidy groups at the start and the end of the experiment
 ```{r, echo=FALSE}
-grid.arrange(
-  sizedat_temp %>% ggplot(aes(x=Ploidy, y = Shell.Height, fill = Time))+geom_violin()+
-    xlab("Ploidy")+ylab("Shell height (mm)")+theme_classic(),
-  
-  sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_violin()+
-    xlab("Ploidy")+ylab("Mass (g)")+theme_classic()
-)
 
+sizedat_temp %>% ggplot(aes(x=Ploidy, y = Shell.Height, fill = Time))+geom_boxplot()+
+    xlab("Ploidy")+ylab("Shell height (mm)")+theme_classic(base_size = 20)+
+  scale_fill_manual(values = c("red", "blue")) +
+    facet_wrap(~Treatment)
+  
+sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_boxplot()+
+  xlab("Ploidy")+ylab("Mass (g)")+theme_bw(base_size = 20)+
+  scale_fill_manual(values = c("red", "blue"), breaks = unique(sizedat_temp$Time), labels = c("Start", "End")) +
+  scale_x_discrete(labels = c("Diploids", "Induced Triploids", "Mated Triploids")) +
+  facet_wrap(~Treatment)
 ```
 
 Plot growth throughout the experiment
@@ -59,21 +63,25 @@ hist((sizedat_temp$Mass))
 hist((sizedat_temp$Shell.Height))
 ```
 
-and the distribution of log transfomed data. Log transformed data is more normaly distrubuted so I am going to do the analyses on log transformed data. 
+and the distribution of log transformed data. Log transformed data is more normally distributed so I am going to do the analyses on log transformed data. 
 ```{r, echo=FALSE}
 hist(log(sizedat_temp$Mass))
 hist(log(sizedat_temp$Shell.Height))
 ```
 
-Develop the model for size and print the contrasts and p values using emmeans package. First I am going to examine growth in terms of total oyste mass. Tank is included as a random effect to account for any inter tank variation. 
+Develop the model for size and print the contrasts and p values using emmeans package. First I am going to examine growth in terms of total oyster mass. Tank is included as a random effect to account for any inter tank variation. 
 ```{r}
-massgrowthlme_temp <- lmer(log(Mass)~Ploidy*Time*Treatment+ (1|Tank), data = sizedat_temp) #This model includes a ransdom effect of tank. 
-emmeans_massgrowthlme_temp <- emmeans(massgrowthlme_temp, ~ Ploidy+Treatment+Time)
-masscontrasts <- contrast(emmeans_massgrowthlme_temp)
+massgrowthlme_temp <- sizedat_temp %>% 
+  lme(log(Mass)~Ploidy*Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(massgrowthlme_temp)
+
+emmeans_massgrowthlme_temp <- emmeans(massgrowthlme_temp, ~ Ploidy*Treatment*Time)
+masscontrasts <- contrast(emmeans_massgrowthlme_temp, adjust = "tukey")
 masscontrastsdf <-  as.data.frame(masscontrasts)
 print(masscontrastsdf %>% filter(p.value <=0.05))
 
 heightgrowthlme_temp <- lmer(Shell.Height~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
+
 ```
 
 The second step is to examine growth in terms of shell height. 
@@ -153,8 +161,11 @@ survival_eventdat_temp$Time <- as.numeric(survival_eventdat_temp$Time)
 sum(survival_eventdat_temp$Status)
 #Merge the file with the list of treatment tanks
 survival_eventdat_temp <- merge(survival_eventdat_temp, temp_tank_assignments, by = "Tank")
+
+survival_eventdat_temp$Colour <- as.factor(survival_eventdat_temp$Colour)
 ```
 
+### Plot the data
 Now the the data is in the correct format I can ployt the mortality. Beacuse mortality was so low this will not be a very interesting plot. This shows pooled mortality across temperature treatments
 
 ```{r, echo=FALSE}
@@ -218,6 +229,37 @@ pooled_site_survplot_temp_Ploidy <- survival_eventdat_temp %>%
 pooled_site_survplot_temp_Ploidy
 ```
 
+### Perform statistical analyses
+
+Using the surv package in R I am going to analyse the data. First creating a Kaplan Meyer survival object and then examining the potential different models
+```{r}
+#Create a survival object for analyses
+surv_temp <- with(survival_eventdat_temp, Surv(Time, event, type = "right"))#For some reason piping does not work here
+#Create the survival models
+K1_temp <- coxph(surv_temp ~ Temp , data = survival_eventdat_temp)
+K2_temp <- coxph(surv_temp ~ Colour , data = survival_eventdat_temp)
+K3_temp <- coxph(surv_temp ~ Colour + Temp, data = survival_eventdat_temp)
+K4_temp <- coxph(surv_temp ~ Colour * Temp, data = survival_eventdat_temp)
+
+summary(K1_temp)
+summary(K2_temp)
+summary(K3_temp)
+summary(K4_temp)
+```
+
+The only model that did not converge was the model that examined survival differences between ploidies. The only significant impact that was shown here is the fact that mated triploids (red) had lower survival than the other two. This was really still an insignificant impact. 
+
+Adding the random effect of tank here may show that this is a random tank effect, rather than a real effect. Thus, here I am going to perform a frailty analysis
+
+```{r}
+survival_eventdat_temp %>% emfrail(surv_temp ~ Temp*Colour + cluster(Tank),
+            distribution = emfrail_dist(dist = "gamma"),
+            data = .) %>%
+  {.}
+
+```
+
+
 ## Respiration
 [Ding et al 2020](https://doi.org/10.3389/fmars.2020.00399) and [Bodenstein](https://www.frontiersin.org/articles/10.3389/fmars.2023.1194296/full) used ANOVAs to compare respiration rates.I will do a linear mixed model where I examine interactions between the environment, ploidy, and whether a heat shock or not has occured. I will include tank as a random factor to account for any potential between tank variation. 
 
@@ -233,6 +275,32 @@ Calculate an oxygen consumption rate per gram per gram. This is to determine if 
 ## Growth
 
 There was a lot of mortality across the tanks so this may be hard to work with. Regardless, I'll follow the same analysis techniques that I used for the temperature growth data. 
+
+First read in and prepare the data
+```{r}
+pHsizedat <- read.csv(here("Data", "pH", "pH_sizedata.csv")) %>% 
+  mutate_at(c("Tank", "Treatment", "Ploidy", "Time.point"), as.factor) %>% 
+  filter(Ploidy != "Blank")
+
+str(pHsizedat)
+```
+
+### Plot the growth data
+
+```{r}
+#Change the order of the facets
+pHsizedat$Treatment <- factor(pHsizedat$Treatment, levels = c("CTRL", "250", "500", "750", "1000"))
+pHsizedat %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time.point))+geom_boxplot()+
+  ylab("Mass (g)")+
+  theme_bw(base_size = 20)+
+  scale_fill_manual(values = c("red", "blue"), breaks = unique(sizedat_temp$Time), labels = c("Start", "End")) +
+  scale_x_discrete(labels = c("Diploids", "Induced Triploids", "Mated Triploids")) +
+  facet_wrap(~Treatment)
+
+# pHsizedat %>% ggplot(aes(x=Ploidy, y = Height, fill = Time.point))+geom_boxplot()+
+#   facet_wrap(~Treatment)
+```
+
 
 ## Mortality
 
@@ -338,7 +406,7 @@ pooled_site_survplot_pH_pooled <- survival_eventdat_pH %>%
  ggsurvplot_facet(survfit(Surv(Date1, event, type = "right") ~ Colour , data = .),
             facet.by = "CO2_level",
             data = .,
-            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
             legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
             xlab = "Time (days)",
              ylim = c(0.7, 1),
@@ -398,18 +466,17 @@ First I am going to do a pooled analysis on all the data. This does not include 
 
 ```{r, echo=FALSE}
 #Create a survival object for analyses
-surv <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
+surv_pH <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
 #Create the survival models
-K1 <- coxph(surv ~ CO2_level , data = survival_eventdat_pH)
-K2 <- coxph(surv ~ Colour , data = survival_eventdat_pH)
-K3 <- coxph(surv ~ Colour + CO2_level, data = survival_eventdat_pH)
-K4 <- coxph(surv ~ Colour * CO2_level, data = survival_eventdat_pH)
+K1_pH <- coxph(surv_pH ~ CO2_level , data = survival_eventdat_pH)
+K2_pH <- coxph(surv_pH ~ Colour , data = survival_eventdat_pH)
+K3_pH <- coxph(surv_pH ~ Colour + CO2_level, data = survival_eventdat_pH)
+K4_pH <- coxph(surv_pH ~ Colour * CO2_level, data = survival_eventdat_pH)
 
-summary(K1)
-summary(K2)
-summary(K3)
-summary(K4)
-
+summary(K1_pH)
+summary(K2_pH)
+summary(K3_pH)
+summary(K4_pH)
 ```
 
 Results of these analyses show that there was as significant impact of pCO2 and ploidy on survival (when pooled). Significant interactions existed between ploidy and pCO2 levels. The graphs show that blue did not survive well in the highest pH treatement. 
@@ -427,6 +494,131 @@ data = .)
 ```
 
 ## Respiration
+
+Read in the data and prepare to analyse it
+
+```{r}
+pHresprates <- read.csv(here("Data", "pH", "pH_masscorrectedrates.csv")) %>% 
+  select("Treatment", "Tank", "Colour", "standardised_rate", "HS", "pCO2") %>% 
+  filter(standardised_rate != "NA") %>% filter(standardised_rate != "Inf") 
+
+pHresprates <- pHresprates %>% mutate_at(c("Treatment", "Tank", "Colour", "Treatment", "HS", "pCO2"), as.factor)
+
+pHresprates <- rename(pHresprates, Rate = standardised_rate) 
+
+#Obtain summary data to plot
+pHresprates_summary <- pHresprates %>%
+  group_by(pCO2, Colour, HS) %>% 
+  summarise(meanrate=mean(Rate), semrate=sd(Rate)/(sqrt(n())))
+
+```
+
+### Plot the pH data
+
+Boxplots of the data
+```{r}
+pHresprates$pCO2 <- factor(pHresprates$pCO2, levels = c("CTRL", "250", "500", "750", "1000"))#Set the order of the facets 
+pHresprates %>% filter(HS == "HS") %>% 
+  ggplot(aes(x=pCO2, y= Rate, fill=Colour))+geom_boxplot()
+
+pHresprates %>% filter(HS != "HS") %>% 
+  ggplot(aes(x=pCO2, y= Rate, fill=Colour))+geom_boxplot()
+```
+
+Response curve of oxygen consumption
+
+```{r}
+pHresprates_summary$pCO2 <- factor(pHresprates_summary$pCO2, levels = c("CTRL", "250", "500", "750", "1000"))
+pHcurve_nohs <- pHresprates_summary %>%
+  #filter(HS != "HS") %>%
+  ggplot(aes(x = pCO2, y = meanrate, group = Colour, colour = Colour)) +
+  geom_line(size = 1) +
+  geom_errorbar(aes(ymin = meanrate - semrate, ymax = meanrate + semrate), width = 0.2) +
+  theme_bw(base_size = 20) +
+  xlab("pCO2") +
+  ylab("Mean oxygen consumption (µmol h-1 g-1)") +
+  scale_color_manual(values = c("#CD950C", "#00688B", "#8B0A50"),   # Custom colors for each group
+                     breaks = c("Blue", "Green", "Red"),   # Names of your groups
+                     labels = c("Diploid", "Mated Triploids", "Induced Triploids"))+   # Custom labels for each group
+  labs(color = "Ploidy")+  # Change the legend title to "Ploidy"
+  facet_wrap(~HS, nrow = 2) +
+  theme(strip.text = element_blank())
+pHcurve_nohs #THIS WAS EXPORTED AT A SIZE OF 10x12 Inches
+
+
+```
+
+### Statistical analysis
+
+Perform a statistical analysis on the data. Doing a linear mixed model with tank as a random effect as we don't care about tank. 
+
+Examine the distribution of the data
+
+```{r}
+hist((pHresprates$Rate))
+hist(sqrt(pHresprates$Rate))
+
+```
+
+A log transformation made the data much more normaly distributed. Thus log transformed data will be used for the statistical analyses
+
+##### Non heat shocked individuals
+
+ Model selction process to determine if we need random effects
+
+```{r}
+#First create a model with no ransom effects
+pHresp_gls <- pHresprates %>% filter(HS == "NOHS") %>%
+  gls(Rate~Colour*pCO2, method="REML", data=.)
+#then create a model with random effects
+pHresp_lme <- pHresprates %>% filter(HS == "NOHS") %>%
+  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+
+anova(pHresp_gls, pHresp_lme)
+```
+
+No significant difference existed between the model that included the ransom effects of tank and the one with no random effects. Thus, going forward i will be using the model with no random effects. 
+
+```{r}
+#Because there are zeros in the data I am going to need to add a very small number to make the data transformable
+pHresprates$ratenozero <- pHresprates$Rate+0.01
+pHresp_lme <- pHresprates %>% filter(HS == "NOHS") %>%
+  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+summary(pHresp_lme)
+anova(pHresp_lme)
+residuals <- resid(pHresp_lme)
+qqnorm(residuals)
+qqline(residuals) #RESIDUALS ARE SHIT
+```
+
+#### Heat Shocked individuals
+
+Compare a model that includes random effects with one that doesn't
+
+
+```{r}
+#First create a model with no ransom effects
+pHresp_gls_HS <- pHresprates %>% filter(HS == "HS") %>%
+  gls(Rate~Colour*pCO2, method="REML", data=.)
+#then create a model with random effects
+pHresp_lme_HS <- pHresprates %>% filter(HS == "HS") %>%
+  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+
+anova(pHresp_gls_HS, pHresp_lme_HS)
+```
+
+Adding a random effect does not improve the model significantly so I am going to use a glm
+
+```{r}
+pHresp_lme_HS <- pHresprates %>% filter(HS == "HS") %>% 
+  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+summary(pHresp_lme_HS)
+anova(pHresp_lme_HS)
+residuals <- resid(pHresp_lme_HS)
+qqnorm(residuals)
+qqline(residuals)
+```
+
 
 # DO 
 
@@ -510,7 +702,7 @@ pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>
  ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
             facet.by = "DO",
             data = .,
-            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
             legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
             xlab = "Time (days)",
              ylim = c(0.7, 1),
@@ -576,11 +768,34 @@ DO_respdat$O2gramgram <- DO_respdat$masscorrectedrate/DO_respdat$drymass
 
 ### Overview of the data
 
+Organise the data
+
+```{r}
+#Add a HS or no HS cvolumn
+DO_respdat <- DO_respdat %>% 
+  mutate(HS = case_when(
+    str_detect(Treatment, "HS") ~ "HS",
+    TRUE ~ "NOHS"
+  )) %>% 
+  mutate(O2 = str_replace(Treatment, "HS", ""))
+#Replace the percentages with a concentration
+DO_respdat <- DO_respdat %>% mutate(O2 = case_when(
+    O2 == 100 ~ "9.57",
+    O2 == 80 ~ "7.66",
+    O2 == 60 ~ "5.74",
+    O2 == 40 ~ "3.83",
+    O2 == 20 ~ "1.91",
+    TRUE ~ O2  # Keep other values unchanged
+  ))
+
+
+```
+
 Create a summary table of the data
 
 ```{r}
 DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>% 
-  group_by(Ploidy, Treatment) %>% 
+  group_by(Ploidy, O2, HS) %>% 
   summarise(n=n(), mean_rate=mean(masscorrectedrate), SEMrate=sd(masscorrectedrate)/sqrt(n()),
             mean_rate_gramgram=mean(O2gramgram), SEMgramgram=sd(O2gramgram)/sqrt(n()))
 ```
@@ -588,14 +803,19 @@ DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>%
 Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.Physiological curves for heat shocked individuals. 
 
 ```{r}
-PhyscurvDO <- DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
-  filter(Treatment != "100") %>% 
-  ggplot(aes(x=Treatment, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+#base graph
+PhyscurvDO <- DO_resp_summarytable %>% 
+  filter(O2 != "9.57") %>% 
+  ggplot(aes(x=O2, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+#base graph
   geom_errorbar(aes(ymin=mean_rate-SEMrate, ymax=mean_rate+SEMrate), width = 0.2, size = 0.5)+ #error bars
   ylim(0,5.3)+
-  theme_classic(base_size = 15)+ylab("Mean oxygen consumption rate (µmol g-1 h-1 ± SEM)")+
-  xlab("Oxygen concentration")+scale_color_brewer(palette = "Dark2")
-
+  scale_color_manual(values = c("#CD950C", "#00688B", "#8B0A50"),   # Custom colors for each group
+                     breaks = c("2M", "3M", "3C"),   # Names of your groups
+                     labels = c("Diploid", "Mated Triploids", "Induced Triploids"))+   # Custom labels for each group
+  labs(color = "Ploidy")+  # Change the legend title to "Ploidy"
+  theme_bw(base_size = 20)+ylab("Mean oxygen consumption rate (µmol g-1 h-1 ± SEM)")+
+  xlab("Oxygen concentration (mg l-1)")+
+  facet_wrap(~HS, nrow=2)+theme(strip.text = element_blank())
+PhyscurvDO
 #Create the same graph with standardised again by gram. This is not really that informative
 # DO_resp_summarytable %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
 #   filter(Treatment != "100") %>% 
@@ -632,19 +852,59 @@ hist(log(DO_respdat$masscorrectedrate))
 
 The logged data has a much more normal distribution so this will be used in the further analyses. 
 
-I don't have the DF to include the HS individuals within the overall test. Will need to perform a seperate test to see if the O2 consumption on all of these is higher. Can I include an additional HS column with only 2 variables? I think so. 
+I am going to do a model selection procedure to determine if there is evidence that a random effect is needed
 
+#### Non heat shocked
 ```{r}
-DOresp_lme <- DO_respdat %>% filter(Treatment != "80HS" & Treatment != "60HS" & Treatment !="20HS") %>% 
-  lmer(log(masscorrectedrate)~Ploidy*Treatment + (1|Tank), data=.)
-summary(DOresp_lme)
+#First model has no random effects
+DO_resp_gls <- DO_respdat %>% filter(HS == "NOHS") %>%
+  gls(masscorrectedrate~Ploidy*O2, method="REML", data=.)
+#then create a model with random effects
+DOresp_lme <- DO_respdat %>% filter(HS == "NOHS") %>%
+  lme(masscorrectedrate~Ploidy*O2, random = ~1 | Tank, data=.)
+anova(DO_resp_gls, DOresp_lme) #No significant differences between the models. AIC is within two for both. Going to use plain GLM
 ```
 
-Print the contrasts in oxygen consumption. CHECK THIS CAREFULLY (16 JAN 2024)
+There is no evedince to support the use of tank as a randeom effect so I will jsut perform a GLM
+
 ```{r}
-emmeans_DOresp_lme <- emmeans(DOresp_lme, ~ Ploidy+Treatment)
-DO_resp_contrasts <- contrast(emmeans_DOresp_lme)
-DO_resp_contrastsdf <-  as.data.frame(DO_resp_contrasts)
-print(DO_resp_contrastsdf %>% filter(p.value <=0.05))
+DOrespglm <- DO_respdat %>% filter(HS == "NOHS") %>%
+  lm(masscorrectedrate~Ploidy*O2, data=.)
+anova(DOrespglm)
+#There is a significant effect of ploidy in this experiment. 
+# Perform post-hoc pairwise tests
+emmeans_results <- emmeans(DOrespglm, pairwise ~ Ploidy, adjust = "tukey")
+
+# Display the results
+summary(emmeans_results)
 ```
 
+Diploids consume signifcantly moe oxygen than mated triploids, but there was no difference between any of the other groups in the non heat shocked group.
+
+
+####  heat shocked
+```{r}
+#First model has no random effects
+DO_resp_gls_HS <- DO_respdat %>% filter(HS == "HS") %>%
+  gls(masscorrectedrate~Ploidy*O2, method="REML", data=.)
+#then create a model with random effects
+DOresp_lme_HS <- DO_respdat %>% filter(HS == "HS") %>%
+  lme(masscorrectedrate~Ploidy*O2, random = ~1 | Tank, data=.)
+anova(DO_resp_gls_HS, DOresp_lme_HS) #No significant differences between the models. AIC is within two for both. Going to use plain GLM
+```
+
+There is no evedince to support the use of tank as a randeom effect so I will just perform a GLM
+
+```{r}
+DOrespglm_HS <- DO_respdat %>% filter(HS == "HS") %>%
+  lm(masscorrectedrate~Ploidy*O2, data=.)
+anova(DOrespglm_HS)
+#There is a significant effect of ploidy in this experiment. 
+# Perform post-hoc pairwise tests
+emmeans_results <- emmeans(DOrespglm, pairwise ~ Ploidy, adjust = "tukey")
+
+# Display the results
+summary(emmeans_results)
+```
+
+No significant impacts on the way that heat shocked individuals respond to stress. 

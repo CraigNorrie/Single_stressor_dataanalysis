@@ -1,0 +1,1136 @@
+Tank,Treatment,Colour,Mass,Height,Ploidy,Time point
+5,CTRL,Blue,2.7,31.99,Diploid,1_start
+5,CTRL,Blue,7.5,50.87,Diploid,1_start
+5,CTRL,Blue,3.7,40.06,Diploid,1_start
+5,CTRL,Blue,6.5,50.6,Diploid,1_start
+5,CTRL,Blue,5.2,41.98,Diploid,1_start
+5,CTRL,Blue,8.9,54.66,Diploid,1_start
+5,CTRL,Blue,10.7,42.97,Diploid,1_start
+5,CTRL,Blue,8.8,51.54,Diploid,1_start
+5,CTRL,Blue,5.8,43.23,Diploid,1_start
+5,CTRL,Blue,8.6,52.38,Diploid,1_start
+5,CTRL,Blue,8.7,54.4,Diploid,1_start
+5,CTRL,Blue,10.4,50.86,Diploid,1_start
+5,CTRL,Blue,5.4,43.13,Diploid,1_start
+5,CTRL,Blue,10.9,54.66,Diploid,1_start
+5,CTRL,Blue,5,38.46,Diploid,1_start
+4,CTRL,Blue,10.1,49.66,Diploid,1_start
+4,CTRL,Blue,12.1,52.5,Diploid,1_start
+4,CTRL,Blue,9.4,55.42,Diploid,1_start
+4,CTRL,Blue,14.5,68.16,Diploid,1_start
+4,CTRL,Blue,4.8,41.72,Diploid,1_start
+4,CTRL,Blue,6.4,47.61,Diploid,1_start
+4,CTRL,Blue,6.2,44.59,Diploid,1_start
+4,CTRL,Blue,7.3,51.08,Diploid,1_start
+4,CTRL,Blue,10.1,56.81,Diploid,1_start
+4,CTRL,Blue,8.4,50.45,Diploid,1_start
+4,CTRL,Blue,9.8,47.15,Diploid,1_start
+4,CTRL,Blue,3.7,43.46,Diploid,1_start
+4,CTRL,Blue,8,54.79,Diploid,1_start
+4,CTRL,Blue,6,49.26,Diploid,1_start
+4,CTRL,Blue,7.9,54.63,Diploid,1_start
+14,CTRL,Blue,7.1,57.11,Diploid,1_start
+14,CTRL,Blue,4.7,36.63,Diploid,1_start
+14,CTRL,Blue,6.8,39.94,Diploid,1_start
+14,CTRL,Blue,5.6,41.97,Diploid,1_start
+14,CTRL,Blue,5.2,42.11,Diploid,1_start
+14,CTRL,Blue,6.5,46.49,Diploid,1_start
+14,CTRL,Blue,5.8,51.61,Diploid,1_start
+14,CTRL,Blue,7.3,48.52,Diploid,1_start
+14,CTRL,Blue,3.8,37.61,Diploid,1_start
+14,CTRL,Blue,3,31.65,Diploid,1_start
+14,CTRL,Blue,6.9,49.08,Diploid,1_start
+14,CTRL,Blue,5.8,58.54,Diploid,1_start
+14,CTRL,Blue,9.3,54.13,Diploid,1_start
+14,CTRL,Blue,5.4,40.68,Diploid,1_start
+14,CTRL,Blue,5.6,43.87,Diploid,1_start
+5,CTRL,Green,3.5,34.77,Mated Triploid,1_start
+5,CTRL,Green,15.9,61.33,Mated Triploid,1_start
+5,CTRL,Green,7.3,47.03,Mated Triploid,1_start
+5,CTRL,Green,25.6,65.86,Mated Triploid,1_start
+5,CTRL,Green,26.7,73.53,Mated Triploid,1_start
+5,CTRL,Green,4.9,43.87,Mated Triploid,1_start
+5,CTRL,Green,23,57.65,Mated Triploid,1_start
+5,CTRL,Green,12.4,63.92,Mated Triploid,1_start
+5,CTRL,Green,16.6,56.24,Mated Triploid,1_start
+5,CTRL,Green,10.6,55.17,Mated Triploid,1_start
+5,CTRL,Green,10,60.12,Mated Triploid,1_start
+5,CTRL,Green,9.9,54.31,Mated Triploid,1_start
+5,CTRL,Green,4.3,39.17,Mated Triploid,1_start
+5,CTRL,Green,4,40.06,Mated Triploid,1_start
+5,CTRL,Green,15.7,60.94,Mated Triploid,1_start
+4,CTRL,Green,5.8,38.98,Mated Triploid,1_start
+4,CTRL,Green,7.9,48.13,Mated Triploid,1_start
+4,CTRL,Green,3.6,40.41,Mated Triploid,1_start
+4,CTRL,Green,12.7,49.93,Mated Triploid,1_start
+4,CTRL,Green,5.1,49.16,Mated Triploid,1_start
+4,CTRL,Green,10.1,57.48,Mated Triploid,1_start
+4,CTRL,Green,23.9,67.41,Mated Triploid,1_start
+4,CTRL,Green,7.3,44.25,Mated Triploid,1_start
+4,CTRL,Green,3.2,39,Mated Triploid,1_start
+4,CTRL,Green,4.5,44.32,Mated Triploid,1_start
+4,CTRL,Green,6.2,43.48,Mated Triploid,1_start
+4,CTRL,Green,6,46.85,Mated Triploid,1_start
+4,CTRL,Green,8.3,44.7,Mated Triploid,1_start
+4,CTRL,Green,21.3,70.61,Mated Triploid,1_start
+4,CTRL,Green,4.2,36.85,Mated Triploid,1_start
+14,CTRL,Green,20,59.31,Mated Triploid,1_start
+14,CTRL,Green,8.3,53.66,Mated Triploid,1_start
+14,CTRL,Green,6.7,50.08,Mated Triploid,1_start
+14,CTRL,Green,24.3,57.32,Mated Triploid,1_start
+14,CTRL,Green,5.6,41.9,Mated Triploid,1_start
+14,CTRL,Green,5.8,42.71,Mated Triploid,1_start
+14,CTRL,Green,5.8,48.42,Mated Triploid,1_start
+14,CTRL,Green,6.4,43.43,Mated Triploid,1_start
+14,CTRL,Green,5.7,44.41,Mated Triploid,1_start
+14,CTRL,Green,25.2,67.57,Mated Triploid,1_start
+14,CTRL,Green,13,59.41,Mated Triploid,1_start
+14,CTRL,Green,5.7,42.39,Mated Triploid,1_start
+14,CTRL,Green,11.4,41.08,Mated Triploid,1_start
+14,CTRL,Green,10.8,54.38,Mated Triploid,1_start
+14,CTRL,Green,11.1,50.68,Mated Triploid,1_start
+5,CTRL,Red,11.5,49.88,Induced Triploid,1_start
+5,CTRL,Red,14.9,48.11,Induced Triploid,1_start
+5,CTRL,Red,8.1,51.2,Induced Triploid,1_start
+5,CTRL,Red,6.4,46.8,Induced Triploid,1_start
+5,CTRL,Red,9.3,46.73,Induced Triploid,1_start
+5,CTRL,Red,5.6,43.92,Induced Triploid,1_start
+5,CTRL,Red,6.9,41.62,Induced Triploid,1_start
+5,CTRL,Red,4.5,37.37,Induced Triploid,1_start
+5,CTRL,Red,10.4,49.15,Induced Triploid,1_start
+5,CTRL,Red,9.6,46.78,Induced Triploid,1_start
+5,CTRL,Red,11.2,51.02,Induced Triploid,1_start
+5,CTRL,Red,16.4,52.73,Induced Triploid,1_start
+5,CTRL,Red,9.2,49.21,Induced Triploid,1_start
+5,CTRL,Red,13.6,53.74,Induced Triploid,1_start
+5,CTRL,Red,11.2,59.93,Induced Triploid,1_start
+4,CTRL,Red,5.9,52.94,Induced Triploid,1_start
+4,CTRL,Red,10.9,48.76,Induced Triploid,1_start
+4,CTRL,Red,6.1,45.08,Induced Triploid,1_start
+4,CTRL,Red,17.6,59,Induced Triploid,1_start
+4,CTRL,Red,6.8,41.92,Induced Triploid,1_start
+4,CTRL,Red,7.7,50.85,Induced Triploid,1_start
+4,CTRL,Red,6.7,44.62,Induced Triploid,1_start
+4,CTRL,Red,6.9,46.38,Induced Triploid,1_start
+4,CTRL,Red,14.5,56.9,Induced Triploid,1_start
+4,CTRL,Red,5.2,39.53,Induced Triploid,1_start
+4,CTRL,Red,6.9,44.73,Induced Triploid,1_start
+4,CTRL,Red,14,52.96,Induced Triploid,1_start
+4,CTRL,Red,12.8,52.38,Induced Triploid,1_start
+4,CTRL,Red,9.7,59.01,Induced Triploid,1_start
+4,CTRL,Red,5.5,44.44,Induced Triploid,1_start
+14,CTRL,Red,5.9,47.36,Induced Triploid,1_start
+14,CTRL,Red,8.9,53.53,Induced Triploid,1_start
+14,CTRL,Red,7.3,50.87,Induced Triploid,1_start
+14,CTRL,Red,13.2,53.03,Induced Triploid,1_start
+14,CTRL,Red,9.5,51.55,Induced Triploid,1_start
+14,CTRL,Red,7,44.24,Induced Triploid,1_start
+14,CTRL,Red,5.6,45.49,Induced Triploid,1_start
+14,CTRL,Red,5,40.4,Induced Triploid,1_start
+14,CTRL,Red,7.6,50.61,Induced Triploid,1_start
+14,CTRL,Red,5.4,44.97,Induced Triploid,1_start
+14,CTRL,Red,8.8,43.06,Induced Triploid,1_start
+14,CTRL,Red,9.5,51.24,Induced Triploid,1_start
+14,CTRL,Red,5.2,44.61,Induced Triploid,1_start
+14,CTRL,Red,12.6,52.47,Induced Triploid,1_start
+14,CTRL,Red,14.9,55.96,Induced Triploid,1_start
+6,250,Red,11,50.27,Induced Triploid,1_start
+6,250,Red,6.8,43.47,Induced Triploid,1_start
+6,250,Red,7.7,45.86,Induced Triploid,1_start
+6,250,Red,5.6,32.59,Induced Triploid,1_start
+6,250,Red,9.3,52.8,Induced Triploid,1_start
+6,250,Red,4.2,36.79,Induced Triploid,1_start
+6,250,Red,10.5,47.87,Induced Triploid,1_start
+6,250,Red,11,47.33,Induced Triploid,1_start
+6,250,Red,6,41.01,Induced Triploid,1_start
+6,250,Red,7.8,49.87,Induced Triploid,1_start
+6,250,Red,5,43.86,Induced Triploid,1_start
+6,250,Red,13.7,57.49,Induced Triploid,1_start
+6,250,Red,6.3,40.59,Induced Triploid,1_start
+6,250,Red,4,33.06,Induced Triploid,1_start
+6,250,Red,5.7,43.03,Induced Triploid,1_start
+11,250,Red,13.9,55.13,Induced Triploid,1_start
+11,250,Red,15.4,62.57,Induced Triploid,1_start
+11,250,Red,4.2,34.45,Induced Triploid,1_start
+11,250,Red,5.7,40.76,Induced Triploid,1_start
+11,250,Red,5.4,40.01,Induced Triploid,1_start
+11,250,Red,7.2,46.58,Induced Triploid,1_start
+11,250,Red,6,44.85,Induced Triploid,1_start
+11,250,Red,4.3,44.28,Induced Triploid,1_start
+11,250,Red,7.2,45.84,Induced Triploid,1_start
+11,250,Red,9.4,51.01,Induced Triploid,1_start
+11,250,Red,7.5,47.18,Induced Triploid,1_start
+11,250,Red,5.1,38.37,Induced Triploid,1_start
+11,250,Red,4.2,32.77,Induced Triploid,1_start
+11,250,Red,5.5,45.76,Induced Triploid,1_start
+11,250,Red,7.4,46.41,Induced Triploid,1_start
+16,250,Red,13,54,Induced Triploid,1_start
+16,250,Red,8.6,47.71,Induced Triploid,1_start
+16,250,Red,17.9,52.72,Induced Triploid,1_start
+16,250,Red,4.8,39.73,Induced Triploid,1_start
+16,250,Red,8.8,45.05,Induced Triploid,1_start
+16,250,Red,6.3,46.22,Induced Triploid,1_start
+16,250,Red,8.2,46.23,Induced Triploid,1_start
+16,250,Red,9.1,52.13,Induced Triploid,1_start
+16,250,Red,6.6,40.69,Induced Triploid,1_start
+16,250,Red,5.2,36.96,Induced Triploid,1_start
+16,250,Red,8.5,47.58,Induced Triploid,1_start
+16,250,Red,5.9,44.74,Induced Triploid,1_start
+16,250,Red,10.6,47.09,Induced Triploid,1_start
+16,250,Red,21.4,61.27,Induced Triploid,1_start
+16,250,Red,8.8,51.2,Induced Triploid,1_start
+6,250,Blue,4.8,47.18,Diploid,1_start
+6,250,Blue,4.6,34.5,Diploid,1_start
+6,250,Blue,7.7,47.11,Diploid,1_start
+6,250,Blue,8,54.95,Diploid,1_start
+6,250,Blue,8.9,55.15,Diploid,1_start
+6,250,Blue,6.4,52.41,Diploid,1_start
+6,250,Blue,6.3,50.46,Diploid,1_start
+6,250,Blue,4.8,40.16,Diploid,1_start
+6,250,Blue,6.8,47.67,Diploid,1_start
+6,250,Blue,5.6,49.55,Diploid,1_start
+6,250,Blue,7.9,51.59,Diploid,1_start
+6,250,Blue,10.1,53.48,Diploid,1_start
+6,250,Blue,7.3,49.69,Diploid,1_start
+6,250,Blue,9.7,55.64,Diploid,1_start
+6,250,Blue,5.6,38.67,Diploid,1_start
+11,250,Blue,4.8,45.24,Diploid,1_start
+11,250,Blue,9.5,53.07,Diploid,1_start
+11,250,Blue,5,41.07,Diploid,1_start
+11,250,Blue,13.8,54.51,Diploid,1_start
+11,250,Blue,9.6,55.84,Diploid,1_start
+11,250,Blue,10.2,50.37,Diploid,1_start
+11,250,Blue,4.5,37.24,Diploid,1_start
+11,250,Blue,5.4,41.25,Diploid,1_start
+11,250,Blue,10.7,47.53,Diploid,1_start
+11,250,Blue,7.2,50.47,Diploid,1_start
+11,250,Blue,4.3,45.12,Diploid,1_start
+11,250,Blue,10.7,52.68,Diploid,1_start
+11,250,Blue,3.4,43.89,Diploid,1_start
+11,250,Blue,7.8,43.66,Diploid,1_start
+11,250,Blue,7,47.82,Diploid,1_start
+16,250,Blue,5.3,41.9,Diploid,1_start
+16,250,Blue,8.4,46.7,Diploid,1_start
+16,250,Blue,11.9,53.52,Diploid,1_start
+16,250,Blue,8.2,51.85,Diploid,1_start
+16,250,Blue,3.8,38.12,Diploid,1_start
+16,250,Blue,12,50.44,Diploid,1_start
+16,250,Blue,8.4,45.49,Diploid,1_start
+16,250,Blue,5.4,43.24,Diploid,1_start
+16,250,Blue,11.6,54.92,Diploid,1_start
+16,250,Blue,10.1,59.69,Diploid,1_start
+16,250,Blue,4,39.73,Diploid,1_start
+16,250,Blue,4.6,37.49,Diploid,1_start
+16,250,Blue,3.5,41.22,Diploid,1_start
+16,250,Blue,8.6,55.26,Diploid,1_start
+16,250,Blue,6.7,49.12,Diploid,1_start
+6,250,Green,8.9,62.02,Mated Triploid,1_start
+6,250,Green,4.3,36.48,Mated Triploid,1_start
+6,250,Green,21,71.04,Mated Triploid,1_start
+6,250,Green,16.3,62.35,Mated Triploid,1_start
+6,250,Green,7.8,58.64,Mated Triploid,1_start
+6,250,Green,11.7,45.28,Mated Triploid,1_start
+6,250,Green,16.6,73.11,Mated Triploid,1_start
+6,250,Green,10.4,52.99,Mated Triploid,1_start
+6,250,Green,7.4,45.41,Mated Triploid,1_start
+6,250,Green,16.3,59.38,Mated Triploid,1_start
+6,250,Green,13.4,51,Mated Triploid,1_start
+6,250,Green,12.9,48.18,Mated Triploid,1_start
+6,250,Green,15.9,60.01,Mated Triploid,1_start
+6,250,Green,17.1,43.18,Mated Triploid,1_start
+6,250,Green,4.6,46.3,Mated Triploid,1_start
+11,250,Green,9.2,51.94,Mated Triploid,1_start
+11,250,Green,16.2,64.26,Mated Triploid,1_start
+11,250,Green,19,71.21,Mated Triploid,1_start
+11,250,Green,7.3,46.54,Mated Triploid,1_start
+11,250,Green,6.5,47.17,Mated Triploid,1_start
+11,250,Green,14.2,59.86,Mated Triploid,1_start
+11,250,Green,17.4,61.43,Mated Triploid,1_start
+11,250,Green,9.1,46.12,Mated Triploid,1_start
+11,250,Green,11,53.13,Mated Triploid,1_start
+11,250,Green,8.9,49.82,Mated Triploid,1_start
+11,250,Green,8,57.4,Mated Triploid,1_start
+11,250,Green,9.9,57.45,Mated Triploid,1_start
+11,250,Green,5.5,53.84,Mated Triploid,1_start
+11,250,Green,7.4,56.64,Mated Triploid,1_start
+11,250,Green,18.1,51.11,Mated Triploid,1_start
+16,250,Green,6.1,42.31,Mated Triploid,1_start
+16,250,Green,6.3,49.51,Mated Triploid,1_start
+16,250,Green,28.6,78.01,Mated Triploid,1_start
+16,250,Green,12.2,73.66,Mated Triploid,1_start
+16,250,Green,8,55.45,Mated Triploid,1_start
+16,250,Green,14.4,60.93,Mated Triploid,1_start
+16,250,Green,10.9,60.21,Mated Triploid,1_start
+16,250,Green,21.5,65.92,Mated Triploid,1_start
+16,250,Green,8.5,51.92,Mated Triploid,1_start
+16,250,Green,16.6,55.87,Mated Triploid,1_start
+16,250,Green,7.1,50.8,Mated Triploid,1_start
+16,250,Green,13.7,60.44,Mated Triploid,1_start
+16,250,Green,7.7,48.97,Mated Triploid,1_start
+16,250,Green,16.8,72.48,Mated Triploid,1_start
+16,250,Green,12,60.63,Mated Triploid,1_start
+2,500,Blue,5.7,40.39,Diploid,1_start
+2,500,Blue,9.5,48.57,Diploid,1_start
+2,500,Blue,4.5,40.95,Diploid,1_start
+2,500,Blue,4.2,35.51,Diploid,1_start
+2,500,Blue,6,39.82,Diploid,1_start
+2,500,Blue,6.1,48.71,Diploid,1_start
+2,500,Blue,7.3,45.58,Diploid,1_start
+2,500,Blue,10.2,58.29,Diploid,1_start
+2,500,Blue,9.2,51.79,Diploid,1_start
+2,500,Blue,7.2,51.85,Diploid,1_start
+2,500,Blue,12.4,59.54,Diploid,1_start
+2,500,Blue,10.6,48.87,Diploid,1_start
+2,500,Blue,6.9,48.13,Diploid,1_start
+2,500,Blue,7.1,47.02,Diploid,1_start
+2,500,Blue,4.3,39.34,Diploid,1_start
+9,500,Blue,8.6,47.19,Diploid,1_start
+9,500,Blue,3,33.48,Diploid,1_start
+9,500,Blue,6.3,52.98,Diploid,1_start
+9,500,Blue,4,40.65,Diploid,1_start
+9,500,Blue,5.3,44.9,Diploid,1_start
+9,500,Blue,5.7,45.63,Diploid,1_start
+9,500,Blue,14.1,54.93,Diploid,1_start
+9,500,Blue,8.6,53.82,Diploid,1_start
+9,500,Blue,7.5,54.34,Diploid,1_start
+9,500,Blue,5.2,45.75,Diploid,1_start
+9,500,Blue,6.7,51.54,Diploid,1_start
+9,500,Blue,13.2,66.35,Diploid,1_start
+9,500,Blue,12.2,59.78,Diploid,1_start
+9,500,Blue,9.7,49.02,Diploid,1_start
+9,500,Blue,10.3,48.83,Diploid,1_start
+15,500,Blue,5.7,47.63,Diploid,1_start
+15,500,Blue,7.1,47.67,Diploid,1_start
+15,500,Blue,3.2,31.63,Diploid,1_start
+15,500,Blue,6.2,45.16,Diploid,1_start
+15,500,Blue,9.6,51.09,Diploid,1_start
+15,500,Blue,8.8,56.44,Diploid,1_start
+15,500,Blue,5.3,50.92,Diploid,1_start
+15,500,Blue,5.3,50.18,Diploid,1_start
+15,500,Blue,4,32.56,Diploid,1_start
+15,500,Blue,8.5,51.49,Diploid,1_start
+15,500,Blue,2.6,28.38,Diploid,1_start
+15,500,Blue,9.8,50.03,Diploid,1_start
+15,500,Blue,4.1,46.04,Diploid,1_start
+15,500,Blue,8.9,45.97,Diploid,1_start
+15,500,Blue,10,48.89,Diploid,1_start
+2,500,Red,3.9,38.35,Induced Triploid,1_start
+2,500,Red,6.1,42.47,Induced Triploid,1_start
+2,500,Red,8.1,39.77,Induced Triploid,1_start
+2,500,Red,15.9,50.65,Induced Triploid,1_start
+2,500,Red,5,41.71,Induced Triploid,1_start
+2,500,Red,10.4,54.1,Induced Triploid,1_start
+2,500,Red,11.6,47.4,Induced Triploid,1_start
+2,500,Red,7.9,51.55,Induced Triploid,1_start
+2,500,Red,5.1,40.54,Induced Triploid,1_start
+2,500,Red,12.5,54.36,Induced Triploid,1_start
+2,500,Red,14.9,50.98,Induced Triploid,1_start
+2,500,Red,9.1,46.54,Induced Triploid,1_start
+2,500,Red,11,58.22,Induced Triploid,1_start
+2,500,Red,7.8,50.09,Induced Triploid,1_start
+2,500,Red,6.2,44.59,Induced Triploid,1_start
+9,500,Red,9.6,45.35,Induced Triploid,1_start
+9,500,Red,2.9,29.73,Induced Triploid,1_start
+9,500,Red,17.5,62.88,Induced Triploid,1_start
+9,500,Red,11,50.69,Induced Triploid,1_start
+9,500,Red,6.2,43.95,Induced Triploid,1_start
+9,500,Red,7.2,42.94,Induced Triploid,1_start
+9,500,Red,7.7,44.64,Induced Triploid,1_start
+9,500,Red,6.2,42.08,Induced Triploid,1_start
+9,500,Red,11.3,53.35,Induced Triploid,1_start
+9,500,Red,10.7,54.42,Induced Triploid,1_start
+9,500,Red,7.1,43.41,Induced Triploid,1_start
+9,500,Red,5.1,40.72,Induced Triploid,1_start
+9,500,Red,6.8,43.64,Induced Triploid,1_start
+9,500,Red,6.8,47.64,Induced Triploid,1_start
+9,500,Red,4,39.34,Induced Triploid,1_start
+15,500,Red,11.9,62.44,Induced Triploid,1_start
+15,500,Red,3.3,35.84,Induced Triploid,1_start
+15,500,Red,15.6,66.07,Induced Triploid,1_start
+15,500,Red,5.6,35.81,Induced Triploid,1_start
+15,500,Red,14.1,57.42,Induced Triploid,1_start
+15,500,Red,10.8,52.03,Induced Triploid,1_start
+15,500,Red,8.3,46.41,Induced Triploid,1_start
+15,500,Red,6.7,44.18,Induced Triploid,1_start
+15,500,Red,4.6,40.23,Induced Triploid,1_start
+15,500,Red,7.1,44.88,Induced Triploid,1_start
+15,500,Red,4.1,41.42,Induced Triploid,1_start
+15,500,Red,7.2,48.98,Induced Triploid,1_start
+15,500,Red,13.8,47.96,Induced Triploid,1_start
+15,500,Red,8.7,44.75,Induced Triploid,1_start
+15,500,Red,10.2,57.5,Induced Triploid,1_start
+2,500,Green,11.7,60.17,Mated Triploid,1_start
+2,500,Green,9.7,56.57,Mated Triploid,1_start
+2,500,Green,16.3,56.6,Mated Triploid,1_start
+2,500,Green,12.5,55.49,Mated Triploid,1_start
+2,500,Green,9.1,49.58,Mated Triploid,1_start
+2,500,Green,9.7,51.22,Mated Triploid,1_start
+2,500,Green,9.3,46.59,Mated Triploid,1_start
+2,500,Green,15.3,59.45,Mated Triploid,1_start
+2,500,Green,16.6,68.74,Mated Triploid,1_start
+2,500,Green,17.5,59.7,Mated Triploid,1_start
+2,500,Green,10.7,45.33,Mated Triploid,1_start
+2,500,Green,8.2,51.53,Mated Triploid,1_start
+2,500,Green,9.2,51.44,Mated Triploid,1_start
+2,500,Green,7.5,48.03,Mated Triploid,1_start
+2,500,Green,10.2,51.39,Mated Triploid,1_start
+9,500,Green,7.9,56.31,Mated Triploid,1_start
+9,500,Green,5.4,61.29,Mated Triploid,1_start
+9,500,Green,10.8,44.71,Mated Triploid,1_start
+9,500,Green,7.4,52.8,Mated Triploid,1_start
+9,500,Green,7.4,56.16,Mated Triploid,1_start
+9,500,Green,10.8,57.83,Mated Triploid,1_start
+9,500,Green,13.6,57.31,Mated Triploid,1_start
+9,500,Green,16.8,54.31,Mated Triploid,1_start
+9,500,Green,18.2,62.53,Mated Triploid,1_start
+9,500,Green,22,60.5,Mated Triploid,1_start
+9,500,Green,12.4,54.01,Mated Triploid,1_start
+9,500,Green,11.6,58.93,Mated Triploid,1_start
+9,500,Green,15.2,52.04,Mated Triploid,1_start
+9,500,Green,26.6,76.78,Mated Triploid,1_start
+9,500,Green,7.8,57.95,Mated Triploid,1_start
+15,500,Green,14.9,59.24,Mated Triploid,1_start
+15,500,Green,5,45.45,Mated Triploid,1_start
+15,500,Green,9.1,53.12,Mated Triploid,1_start
+15,500,Green,8.9,54.76,Mated Triploid,1_start
+15,500,Green,13.1,61.24,Mated Triploid,1_start
+15,500,Green,9.5,57.91,Mated Triploid,1_start
+15,500,Green,8.6,47.28,Mated Triploid,1_start
+15,500,Green,9,49.96,Mated Triploid,1_start
+15,500,Green,10,46.45,Mated Triploid,1_start
+15,500,Green,20.7,61.39,Mated Triploid,1_start
+15,500,Green,7.3,52.26,Mated Triploid,1_start
+15,500,Green,7.6,52.46,Mated Triploid,1_start
+15,500,Green,15.3,53.92,Mated Triploid,1_start
+15,500,Green,15.5,58.26,Mated Triploid,1_start
+15,500,Green,16.6,70.36,Mated Triploid,1_start
+1,750,Blue,6.2,45.35,Diploid,1_start
+1,750,Blue,7.4,48.75,Diploid,1_start
+1,750,Blue,10.6,60.64,Diploid,1_start
+1,750,Blue,5.7,43.67,Diploid,1_start
+1,750,Blue,4.1,39.01,Diploid,1_start
+1,750,Blue,4.4,39.51,Diploid,1_start
+1,750,Blue,6.3,50.45,Diploid,1_start
+1,750,Blue,5.9,45.64,Diploid,1_start
+1,750,Blue,4.3,43.76,Diploid,1_start
+1,750,Blue,4.3,36.64,Diploid,1_start
+1,750,Blue,4.2,40.52,Diploid,1_start
+1,750,Blue,5.3,45.57,Diploid,1_start
+1,750,Blue,4.4,38.89,Diploid,1_start
+1,750,Blue,6,51.73,Diploid,1_start
+1,750,Blue,3.4,33.86,Diploid,1_start
+7,750,Blue,5.3,52.06,Diploid,1_start
+7,750,Blue,9.9,51.24,Diploid,1_start
+7,750,Blue,9,54.28,Diploid,1_start
+7,750,Blue,7.3,54.7,Diploid,1_start
+7,750,Blue,6.3,46.73,Diploid,1_start
+7,750,Blue,5.8,45.26,Diploid,1_start
+7,750,Blue,8.8,50.8,Diploid,1_start
+7,750,Blue,10.3,57.41,Diploid,1_start
+7,750,Blue,8.4,49.76,Diploid,1_start
+7,750,Blue,5.5,48.67,Diploid,1_start
+7,750,Blue,10,49.03,Diploid,1_start
+7,750,Blue,8.7,53.76,Diploid,1_start
+7,750,Blue,4.5,48.96,Diploid,1_start
+7,750,Blue,6.2,42.58,Diploid,1_start
+7,750,Blue,4.6,44.9,Diploid,1_start
+12,750,Blue,9.8,53.04,Diploid,1_start
+12,750,Blue,7.5,49.79,Diploid,1_start
+12,750,Blue,4.3,36.18,Diploid,1_start
+12,750,Blue,8.4,52.58,Diploid,1_start
+12,750,Blue,6.4,47.26,Diploid,1_start
+12,750,Blue,7.6,54.21,Diploid,1_start
+12,750,Blue,16.6,68.38,Diploid,1_start
+12,750,Blue,2.8,32.71,Diploid,1_start
+12,750,Blue,5,39.01,Diploid,1_start
+12,750,Blue,11.3,52.33,Diploid,1_start
+12,750,Blue,6.6,43.23,Diploid,1_start
+12,750,Blue,5.2,42.14,Diploid,1_start
+12,750,Blue,8.8,50.9,Diploid,1_start
+12,750,Blue,7.1,44.61,Diploid,1_start
+12,750,Blue,9.3,54.69,Diploid,1_start
+1,750,Red,10.2,51.25,Induced Triploid,1_start
+1,750,Red,8.5,40.84,Induced Triploid,1_start
+1,750,Red,16,63.3,Induced Triploid,1_start
+1,750,Red,6.6,39.49,Induced Triploid,1_start
+1,750,Red,9.7,45.83,Induced Triploid,1_start
+1,750,Red,5.5,40.65,Induced Triploid,1_start
+1,750,Red,5.2,42.47,Induced Triploid,1_start
+1,750,Red,5.4,41.17,Induced Triploid,1_start
+1,750,Red,10,51.69,Induced Triploid,1_start
+1,750,Red,12.6,45.91,Induced Triploid,1_start
+1,750,Red,6,42.69,Induced Triploid,1_start
+1,750,Red,4.8,44.63,Induced Triploid,1_start
+1,750,Red,4.4,34.21,Induced Triploid,1_start
+1,750,Red,7.5,45.22,Induced Triploid,1_start
+1,750,Red,6.4,42.63,Induced Triploid,1_start
+7,750,Red,8.4,46.47,Induced Triploid,1_start
+7,750,Red,7.6,38.27,Induced Triploid,1_start
+7,750,Red,10.1,54.69,Induced Triploid,1_start
+7,750,Red,6.8,48.02,Induced Triploid,1_start
+7,750,Red,5.3,44.26,Induced Triploid,1_start
+7,750,Red,9.4,48.21,Induced Triploid,1_start
+7,750,Red,3.9,37.63,Induced Triploid,1_start
+7,750,Red,7.5,47.9,Induced Triploid,1_start
+7,750,Red,3.6,42.24,Induced Triploid,1_start
+7,750,Red,5.5,43.77,Induced Triploid,1_start
+7,750,Red,8.6,47.57,Induced Triploid,1_start
+7,750,Red,6,41.58,Induced Triploid,1_start
+7,750,Red,13.5,53.81,Induced Triploid,1_start
+7,750,Red,3.2,37.68,Induced Triploid,1_start
+7,750,Red,3.6,44.96,Induced Triploid,1_start
+12,750,Red,11.3,49.33,Induced Triploid,1_start
+12,750,Red,5.5,36.63,Induced Triploid,1_start
+12,750,Red,13.8,48.21,Induced Triploid,1_start
+12,750,Red,6.2,49.81,Induced Triploid,1_start
+12,750,Red,8.8,44.72,Induced Triploid,1_start
+12,750,Red,7.7,50.63,Induced Triploid,1_start
+12,750,Red,14.4,61.12,Induced Triploid,1_start
+12,750,Red,4.4,38.56,Induced Triploid,1_start
+12,750,Red,15.5,70.43,Induced Triploid,1_start
+12,750,Red,11.1,49.88,Induced Triploid,1_start
+12,750,Red,3.9,42.75,Induced Triploid,1_start
+12,750,Red,6.7,40.88,Induced Triploid,1_start
+12,750,Red,6.5,49.72,Induced Triploid,1_start
+12,750,Red,4.5,38.86,Induced Triploid,1_start
+12,750,Red,6.5,46.6,Induced Triploid,1_start
+1,750,Green,8.8,50.72,Mated Triploid,1_start
+1,750,Green,11.7,57.2,Mated Triploid,1_start
+1,750,Green,20.1,60.05,Mated Triploid,1_start
+1,750,Green,7.1,45,Mated Triploid,1_start
+1,750,Green,20.8,71.51,Mated Triploid,1_start
+1,750,Green,12.1,65.48,Mated Triploid,1_start
+1,750,Green,22.4,66.62,Mated Triploid,1_start
+1,750,Green,6.8,50.95,Mated Triploid,1_start
+1,750,Green,11.2,53.67,Mated Triploid,1_start
+1,750,Green,7.5,56.18,Mated Triploid,1_start
+1,750,Green,9.6,53.44,Mated Triploid,1_start
+1,750,Green,7.7,44.21,Mated Triploid,1_start
+1,750,Green,12.6,62.51,Mated Triploid,1_start
+1,750,Green,6.4,42.27,Mated Triploid,1_start
+1,750,Green,12.8,56.39,Mated Triploid,1_start
+7,750,Green,19.9,69.59,Mated Triploid,1_start
+7,750,Green,15.7,61.32,Mated Triploid,1_start
+7,750,Green,8,48.99,Mated Triploid,1_start
+7,750,Green,8.5,55.74,Mated Triploid,1_start
+7,750,Green,20.7,68.32,Mated Triploid,1_start
+7,750,Green,13.2,63.87,Mated Triploid,1_start
+7,750,Green,8.9,60.46,Mated Triploid,1_start
+7,750,Green,3.7,38.57,Mated Triploid,1_start
+7,750,Green,15.1,69.51,Mated Triploid,1_start
+7,750,Green,12.6,55.43,Mated Triploid,1_start
+7,750,Green,16.7,60.8,Mated Triploid,1_start
+7,750,Green,11.5,61.3,Mated Triploid,1_start
+7,750,Green,17.2,57.1,Mated Triploid,1_start
+7,750,Green,12.8,61.81,Mated Triploid,1_start
+7,750,Green,8,54.51,Mated Triploid,1_start
+12,750,Green,14.5,57.28,Mated Triploid,1_start
+12,750,Green,17,63.03,Mated Triploid,1_start
+12,750,Green,7.1,47.89,Mated Triploid,1_start
+12,750,Green,6.9,60.04,Mated Triploid,1_start
+12,750,Green,6.3,42.62,Mated Triploid,1_start
+12,750,Green,8.4,48.92,Mated Triploid,1_start
+12,750,Green,8.9,49.95,Mated Triploid,1_start
+12,750,Green,15.4,56.99,Mated Triploid,1_start
+12,750,Green,11.1,57.44,Mated Triploid,1_start
+12,750,Green,8.8,60.51,Mated Triploid,1_start
+12,750,Green,10.5,55.73,Mated Triploid,1_start
+12,750,Green,17.3,56.82,Mated Triploid,1_start
+12,750,Green,16.2,59.89,Mated Triploid,1_start
+12,750,Green,7,46.07,Mated Triploid,1_start
+12,750,Green,10.3,55.56,Mated Triploid,1_start
+3,1000,Red,8.5,50.13,Induced Triploid,1_start
+3,1000,Red,19.1,55.57,Induced Triploid,1_start
+3,1000,Red,5,44.02,Induced Triploid,1_start
+3,1000,Red,7.1,49.03,Induced Triploid,1_start
+3,1000,Red,6.1,38.44,Induced Triploid,1_start
+3,1000,Red,8.8,46.55,Induced Triploid,1_start
+3,1000,Red,5.8,40.46,Induced Triploid,1_start
+3,1000,Red,15.8,60.56,Induced Triploid,1_start
+3,1000,Red,3.8,38.82,Induced Triploid,1_start
+3,1000,Red,13,54.97,Induced Triploid,1_start
+3,1000,Red,7.1,45.44,Induced Triploid,1_start
+3,1000,Red,5.1,39.92,Induced Triploid,1_start
+3,1000,Red,8.7,38.77,Induced Triploid,1_start
+3,1000,Red,4.1,36.27,Induced Triploid,1_start
+3,1000,Red,3.9,35.39,Induced Triploid,1_start
+10,1000,Red,6.2,51.19,Induced Triploid,1_start
+10,1000,Red,6.4,46.86,Induced Triploid,1_start
+10,1000,Red,7.2,49.97,Induced Triploid,1_start
+10,1000,Red,6.6,42.92,Induced Triploid,1_start
+10,1000,Red,12.9,59.44,Induced Triploid,1_start
+10,1000,Red,4.8,37.5,Induced Triploid,1_start
+10,1000,Red,5.6,47.19,Induced Triploid,1_start
+10,1000,Red,16.9,55.66,Induced Triploid,1_start
+10,1000,Red,9.4,49.44,Induced Triploid,1_start
+10,1000,Red,4.4,37.61,Induced Triploid,1_start
+10,1000,Red,7.8,44.97,Induced Triploid,1_start
+10,1000,Red,5.6,41.5,Induced Triploid,1_start
+10,1000,Red,15.2,65.2,Induced Triploid,1_start
+10,1000,Red,4.4,44.46,Induced Triploid,1_start
+10,1000,Red,12.5,61.47,Induced Triploid,1_start
+13,1000,Red,17.5,58.3,Induced Triploid,1_start
+13,1000,Red,7.3,39.06,Induced Triploid,1_start
+13,1000,Red,6.2,40.66,Induced Triploid,1_start
+13,1000,Red,8.3,55.98,Induced Triploid,1_start
+13,1000,Red,4.8,37.08,Induced Triploid,1_start
+13,1000,Red,5.5,37.02,Induced Triploid,1_start
+13,1000,Red,5.1,40.11,Induced Triploid,1_start
+13,1000,Red,11.6,44.07,Induced Triploid,1_start
+13,1000,Red,4.8,43.6,Induced Triploid,1_start
+13,1000,Red,9.2,46.74,Induced Triploid,1_start
+13,1000,Red,7.6,49.56,Induced Triploid,1_start
+13,1000,Red,9,53.89,Induced Triploid,1_start
+13,1000,Red,8.5,49.33,Induced Triploid,1_start
+13,1000,Red,9.7,47.28,Induced Triploid,1_start
+13,1000,Red,6.3,44.17,Induced Triploid,1_start
+3,1000,Blue,13.2,55.67,Diploid,1_start
+3,1000,Blue,5.1,40.24,Diploid,1_start
+3,1000,Blue,8,51.64,Diploid,1_start
+3,1000,Blue,11.3,54.98,Diploid,1_start
+3,1000,Blue,7,48.13,Diploid,1_start
+3,1000,Blue,8.7,44.99,Diploid,1_start
+3,1000,Blue,12.1,57.87,Diploid,1_start
+3,1000,Blue,5.3,44.15,Diploid,1_start
+3,1000,Blue,8.7,49.46,Diploid,1_start
+3,1000,Blue,11.4,43.17,Diploid,1_start
+3,1000,Blue,10.7,56.31,Diploid,1_start
+3,1000,Blue,8.6,48.03,Diploid,1_start
+3,1000,Blue,8.1,45.85,Diploid,1_start
+3,1000,Blue,9.8,55.42,Diploid,1_start
+3,1000,Blue,8,56.95,Diploid,1_start
+10,1000,Blue,9,53.23,Diploid,1_start
+10,1000,Blue,10.4,54.42,Diploid,1_start
+10,1000,Blue,5.7,42.78,Diploid,1_start
+10,1000,Blue,7.4,52.64,Diploid,1_start
+10,1000,Blue,4.4,40.16,Diploid,1_start
+10,1000,Blue,9.2,63.54,Diploid,1_start
+10,1000,Blue,10.3,51.73,Diploid,1_start
+10,1000,Blue,6.9,50.11,Diploid,1_start
+10,1000,Blue,8.3,45.92,Diploid,1_start
+10,1000,Blue,11.3,53.19,Diploid,1_start
+10,1000,Blue,5,51.44,Diploid,1_start
+10,1000,Blue,8.6,49.93,Diploid,1_start
+10,1000,Blue,3.9,36.36,Diploid,1_start
+10,1000,Blue,5.2,43.37,Diploid,1_start
+10,1000,Blue,4.6,43.32,Diploid,1_start
+13,1000,Blue,4.5,42,Diploid,1_start
+13,1000,Blue,5.1,44.1,Diploid,1_start
+13,1000,Blue,6.2,49.51,Diploid,1_start
+13,1000,Blue,7.9,49.61,Diploid,1_start
+13,1000,Blue,6.5,44.4,Diploid,1_start
+13,1000,Blue,7.2,47.16,Diploid,1_start
+13,1000,Blue,10.9,54.09,Diploid,1_start
+13,1000,Blue,4.8,42.35,Diploid,1_start
+13,1000,Blue,15.1,51.31,Diploid,1_start
+13,1000,Blue,4.3,38.49,Diploid,1_start
+13,1000,Blue,3.4,35.6,Diploid,1_start
+13,1000,Blue,5.4,45.01,Diploid,1_start
+13,1000,Blue,5.5,36.56,Diploid,1_start
+13,1000,Blue,7.6,45.47,Diploid,1_start
+13,1000,Blue,13.3,59.24,Diploid,1_start
+3,1000,Green,21.7,65.64,Mated Triploid,1_start
+3,1000,Green,13,57.76,Mated Triploid,1_start
+3,1000,Green,6.3,50.56,Mated Triploid,1_start
+3,1000,Green,9.6,61.46,Mated Triploid,1_start
+3,1000,Green,9.4,56.69,Mated Triploid,1_start
+3,1000,Green,7.8,47.19,Mated Triploid,1_start
+3,1000,Green,13.4,53.59,Mated Triploid,1_start
+3,1000,Green,15.2,52.13,Mated Triploid,1_start
+3,1000,Green,9.5,62.12,Mated Triploid,1_start
+3,1000,Green,10.2,44.63,Mated Triploid,1_start
+3,1000,Green,11.9,61.7,Mated Triploid,1_start
+3,1000,Green,18.5,62,Mated Triploid,1_start
+3,1000,Green,13.1,63.58,Mated Triploid,1_start
+3,1000,Green,6.8,45.43,Mated Triploid,1_start
+3,1000,Green,17.6,63.26,Mated Triploid,1_start
+10,1000,Green,13.6,62.49,Mated Triploid,1_start
+10,1000,Green,4.6,46.75,Mated Triploid,1_start
+10,1000,Green,10.6,40.6,Mated Triploid,1_start
+10,1000,Green,7,48.52,Mated Triploid,1_start
+10,1000,Green,12.5,54.4,Mated Triploid,1_start
+10,1000,Green,19,70.55,Mated Triploid,1_start
+10,1000,Green,15.1,61.17,Mated Triploid,1_start
+10,1000,Green,6.1,47.4,Mated Triploid,1_start
+10,1000,Green,6,43.87,Mated Triploid,1_start
+10,1000,Green,19,67.95,Mated Triploid,1_start
+10,1000,Green,12.9,61.46,Mated Triploid,1_start
+10,1000,Green,5.7,52.25,Mated Triploid,1_start
+10,1000,Green,21.5,69.88,Mated Triploid,1_start
+10,1000,Green,12.8,62.26,Mated Triploid,1_start
+10,1000,Green,11.8,65.77,Mated Triploid,1_start
+13,1000,Green,13,57.75,Mated Triploid,1_start
+13,1000,Green,7.9,45.36,Mated Triploid,1_start
+13,1000,Green,5.9,50.76,Mated Triploid,1_start
+13,1000,Green,13.2,69.22,Mated Triploid,1_start
+13,1000,Green,10.7,60.89,Mated Triploid,1_start
+13,1000,Green,4.1,40,Mated Triploid,1_start
+13,1000,Green,11.1,52.3,Mated Triploid,1_start
+13,1000,Green,11.8,54.94,Mated Triploid,1_start
+13,1000,Green,17.8,68.65,Mated Triploid,1_start
+13,1000,Green,5.8,46.32,Mated Triploid,1_start
+13,1000,Green,12.1,52.47,Mated Triploid,1_start
+13,1000,Green,7.5,50.27,Mated Triploid,1_start
+13,1000,Green,18.9,64.92,Mated Triploid,1_start
+13,1000,Green,11.5,55.94,Mated Triploid,1_start
+13,1000,Green,9.7,60.48,Mated Triploid,1_start
+10,1000,Green,20.5,77.17,Mated Triploid,1_start
+7,750,Green,3.6,38.7,Mated Triploid,2_end
+7,750,Green,15.4,60.61,Mated Triploid,2_end
+7,750,Green,8.9,48.5,Mated Triploid,2_end
+7,750,Red,5.7,41.22,Induced Triploid,2_end
+7,750,Red,3.3,36,Induced Triploid,2_end
+7,750,Red,6.8,43.72,Induced Triploid,2_end
+7,750,Red,3.8,41.47,Induced Triploid,2_end
+7,750,Blue,6.2,46.28,Diploid,2_end
+7,750,Blue,6.2,44.69,Diploid,2_end
+7,750,Blue,7.8,54.49,Diploid,2_end
+7,750,Blue,4.6,48.26,Diploid,2_end
+7,750,Blue,8.8,49.19,Diploid,2_end
+7,750,Blue,5.5,50.25,Diploid,2_end
+7,750,Blue,4.8,44.87,Diploid,2_end
+7,750,Blue,9.2,53.12,Diploid,2_end
+3,1000,Red,4.3,36.15,Induced Triploid,2_end
+3,1000,Red,5.1,41.92,Induced Triploid,2_end
+3,1000,Red,3.8,39.1,Induced Triploid,2_end
+3,1000,Red,2.9,34.58,Induced Triploid,2_end
+3,1000,Red,4.1,35.56,Induced Triploid,2_end
+3,1000,Red,6,41.49,Induced Triploid,2_end
+3,1000,Red,5.4,38.18,Induced Triploid,2_end
+3,1000,Blue,8.7,41.89,Diploid,2_end
+3,1000,Blue,5.2,39.29,Diploid,2_end
+3,1000,Blue,8.7,48.31,Diploid,2_end
+3,1000,Blue,5.1,38.48,Diploid,2_end
+12,750,Blue,6.9,42.48,Diploid,2_end
+12,750,Blue,2.7,32.72,Diploid,2_end
+12,750,Blue,4.9,35.6,Diploid,2_end
+12,750,Blue,5,34.31,Diploid,2_end
+12,750,Blue,6.6,46.16,Diploid,2_end
+12,750,Blue,7.6,46.46,Diploid,2_end
+12,750,Blue,8.7,51.36,Diploid,2_end
+12,750,Blue,6.5,43.74,Diploid,2_end
+12,750,Green,9,50.39,Mated Triploid,2_end
+12,750,Green,7.2,46.52,Mated Triploid,2_end
+12,750,Red,16.5,71.52,Induced Triploid,2_end
+12,750,Red,5.7,35.04,Induced Triploid,2_end
+12,750,Red,6.6,46.34,Induced Triploid,2_end
+12,750,Red,4,39.49,Induced Triploid,2_end
+12,750,Red,15.4,60.86,Induced Triploid,2_end
+12,750,Red,8,48.63,Induced Triploid,2_end
+12,750,Red,12.4,49.76,Induced Triploid,2_end
+12,750,Red,6.8,43.29,Induced Triploid,2_end
+12,750,Red,6.9,50.19,Induced Triploid,2_end
+12,750,Red,4.7,37.75,Induced Triploid,2_end
+12,750,Red,4.8,39.34,Induced Triploid,2_end
+15,500,Blue,3.1,32.85,Diploid,2_end
+15,500,Blue,4.3,45.06,Diploid,2_end
+15,500,Blue,3.9,34.81,Diploid,2_end
+15,500,Blue,5.3,50.41,Diploid,2_end
+15,500,Blue,2.5,28.3,Diploid,2_end
+15,500,Blue,3.9,37.33,Diploid,2_end
+15,500,Green,13.7,60.46,Mated Triploid,2_end
+15,500,Green,5.3,42.18,Mated Triploid,2_end
+15,500,Green,7.9,48.44,Mated Triploid,2_end
+15,500,Red,3.3,36.22,Induced Triploid,2_end
+15,500,Red,4.7,40.4,Induced Triploid,2_end
+11,250,Red,5.1,38.24,Induced Triploid,2_end
+11,250,Red,5.5,40.93,Induced Triploid,2_end
+11,250,Red,5.1,40.97,Induced Triploid,2_end
+11,250,Red,4,35.96,Induced Triploid,2_end
+11,250,Red,7.9,48.27,Induced Triploid,2_end
+11,250,Red,5.8,44.87,Induced Triploid,2_end
+11,250,Red,4.6,45.13,Induced Triploid,2_end
+11,250,Red,6.5,45.06,Induced Triploid,2_end
+11,250,Red,4.5,31.99,Induced Triploid,2_end
+11,250,Green,19.6,74.13,Mated Triploid,2_end
+11,250,Green,8.3,57.75,Mated Triploid,2_end
+11,250,Green,10,52.62,Mated Triploid,2_end
+11,250,Green,7.7,45.11,Mated Triploid,2_end
+11,250,Green,7.6,53.1,Mated Triploid,2_end
+11,250,Green,9.3,45.37,Mated Triploid,2_end
+11,250,Green,9.8,45.56,Mated Triploid,2_end
+11,250,Green,10.2,55.35,Mated Triploid,2_end
+11,250,Green,8,62.67,Mated Triploid,2_end
+11,250,Green,6.7,45.65,Mated Triploid,2_end
+11,250,Green,5.5,49.9,Mated Triploid,2_end
+11,250,Green,15.6,60.43,Mated Triploid,2_end
+11,250,Green,9.7,52.43,Mated Triploid,2_end
+11,250,Blue,9.7,55.29,Diploid,2_end
+11,250,Blue,4,42.17,Diploid,2_end
+11,250,Blue,8.5,42.59,Diploid,2_end
+11,250,Blue,5.8,39.5,Diploid,2_end
+11,250,Blue,5.5,45.15,Diploid,2_end
+11,250,Blue,5.2,39.73,Diploid,2_end
+11,250,Blue,3.7,42.78,Diploid,2_end
+11,250,Blue,6.8,48.24,Diploid,2_end
+11,250,Blue,4.7,36.41,Diploid,2_end
+11,250,Blue,4.7,30.5,Diploid,2_end
+11,250,Blue,7.2,46.54,Diploid,2_end
+14,CTRL,Green,6,43.37,Mated Triploid,2_end
+14,CTRL,Blue,5.1,36.73,Diploid,2_end
+14,CTRL,Blue,5.3,44.04,Diploid,2_end
+14,CTRL,Blue,4,36.57,Diploid,2_end
+14,CTRL,Blue,3.5,31.85,Diploid,2_end
+14,CTRL,Blue,5.8,41.99,Diploid,2_end
+14,CTRL,Blue,6,42.33,Diploid,2_end
+14,CTRL,Blue,5.6,39.14,Diploid,2_end
+14,CTRL,Blue,4.4,44.14,Diploid,2_end
+14,CTRL,Blue,7.9,49.64,Diploid,2_end
+14,CTRL,Blue,6,42.76,Diploid,2_end
+14,CTRL,Red,5.6,43.98,Induced Triploid,2_end
+14,CTRL,Red,5.1,36.74,Induced Triploid,2_end
+14,CTRL,Red,5.8,42.15,Induced Triploid,2_end
+14,CTRL,Red,7.6,43.97,Induced Triploid,2_end
+16,250,Red,8.8,44.31,Induced Triploid,2_end
+16,250,Red,4.8,39.62,Induced Triploid,2_end
+16,250,Red,4.9,36.93,Induced Triploid,2_end
+16,250,Red,8.7,44.64,Induced Triploid,2_end
+16,250,Red,6.6,46.1,Induced Triploid,2_end
+16,250,Red,7.8,46.11,Induced Triploid,2_end
+16,250,Blue,8.1,48.9,Diploid,2_end
+16,250,Blue,3.5,36.13,Diploid,2_end
+16,250,Blue,4.5,36.59,Diploid,2_end
+16,250,Blue,5.2,41.85,Diploid,2_end
+16,250,Blue,3.8,37.88,Diploid,2_end
+16,250,Blue,6.8,48.83,Diploid,2_end
+16,250,Blue,5.1,43.54,Diploid,2_end
+16,250,Blue,6.7,43.44,Diploid,2_end
+16,250,Blue,3.5,41.78,Diploid,2_end
+16,250,Green,7.1,46.73,Mated Triploid,2_end
+16,250,Green,9.5,50.42,Mated Triploid,2_end
+16,250,Green,6.1,48.3,Mated Triploid,2_end
+16,250,Green,4.5,42.4,Mated Triploid,2_end
+16,250,Green,6.1,41.91,Mated Triploid,2_end
+16,250,Green,8.3,48.12,Mated Triploid,2_end
+16,250,Green,6.8,54.86,Mated Triploid,2_end
+13,1000,Red,8.2,53.68,Induced Triploid,2_end
+13,1000,Green,4.1,38.38,Mated Triploid,2_end
+13,1000,Green,7.9,46.23,Mated Triploid,2_end
+4,CTRL,Red,3.8,34.32,Induced Triploid,2_end
+4,CTRL,Red,5.1,39.64,Induced Triploid,2_end
+4,CTRL,Red,4.4,36.42,Induced Triploid,2_end
+4,CTRL,Red,4.9,37.86,Induced Triploid,2_end
+4,CTRL,Blue,3.8,39.86,Diploid,2_end
+6,250,Red,10.6,48.77,Induced Triploid,2_end
+6,250,Red,6,41.89,Induced Triploid,2_end
+6,250,Red,6.8,44.75,Induced Triploid,2_end
+6,250,Red,6,30.1,Induced Triploid,2_end
+6,250,Red,6.6,39.4,Induced Triploid,2_end
+6,250,Red,5.3,43.14,Induced Triploid,2_end
+6,250,Red,3.9,33.4,Induced Triploid,2_end
+6,250,Red,4.4,36.73,Induced Triploid,2_end
+6,250,Green,7.9,57.9,Mated Triploid,2_end
+6,250,Green,4.6,46.63,Mated Triploid,2_end
+6,250,Green,6.8,46.07,Mated Triploid,2_end
+6,250,Green,7.1,47.07,Mated Triploid,2_end
+6,250,Green,4.7,34.38,Mated Triploid,2_end
+6,250,Blue,8.2,50.57,Diploid,2_end
+6,250,Blue,4.8,46.78,Diploid,2_end
+6,250,Blue,4.8,33.85,Diploid,2_end
+6,250,Blue,10.9,53.74,Diploid,2_end
+6,250,Blue,8.1,45.1,Diploid,2_end
+6,250,Blue,4.1,36.54,Diploid,2_end
+6,250,Blue,5.7,39.63,Diploid,2_end
+6,250,Blue,6.5,48.06,Diploid,2_end
+1,750,Blue,5.9,43.82,Diploid,2_end
+1,750,Blue,6,51.63,Diploid,2_end
+1,750,Blue,4.4,38.92,Diploid,2_end
+1,750,Blue,4.4,38.31,Diploid,2_end
+1,750,Blue,6.4,46.08,Diploid,2_end
+1,750,Red,7.3,42.82,Induced Triploid,2_end
+1,750,Red,6,41.98,Induced Triploid,2_end
+1,750,Red,5.3,41.61,Induced Triploid,2_end
+1,750,Red,5,45.56,Induced Triploid,2_end
+1,750,Red,6.6,43.35,Induced Triploid,2_end
+1,750,Green,7.5,47.06,Mated Triploid,2_end
+2,500,Blue,4.6,41.69,Diploid,2_end
+2,500,Blue,4.3,39.01,Diploid,2_end
+2,500,Blue,7.4,45.89,Diploid,2_end
+2,500,Green,9,52.36,Mated Triploid,2_end
+2,500,Red,4.1,38.14,Induced Triploid,2_end
+2,500,Red,5.2,40.39,Induced Triploid,2_end
+2,500,Red,6.5,42.81,Induced Triploid,2_end
+2,500,Red,8.2,51.22,Induced Triploid,2_end
+2,500,Red,5.1,39.8,Induced Triploid,2_end
+5,CTRL,Blank,19.3,66.86,Blank,2_end
+5,CTRL,Blank,15.1,62.98,Blank,2_end
+5,CTRL,Blank,8.8,49.87,Blank,2_end
+5,CTRL,Blank,4.5,43.48,Blank,2_end
+5,CTRL,Red,6.4,48.13,Induced Triploid,2_end
+5,CTRL,Red,4.8,35.86,Induced Triploid,2_end
+5,CTRL,Red,6.1,36.92,Induced Triploid,2_end
+5,CTRL,Red,6.8,40.54,Induced Triploid,2_end
+5,CTRL,Red,10.8,46.74,Induced Triploid,2_end
+5,CTRL,Red,5.4,42.34,Induced Triploid,2_end
+5,CTRL,Red,9.8,46.91,Induced Triploid,2_end
+5,CTRL,Blue,5,42.09,Diploid,2_end
+5,CTRL,Blue,6.6,40.61,Diploid,2_end
+5,CTRL,Blue,3.7,38.25,Diploid,2_end
+5,CTRL,Blue,2.7,33.6,Diploid,2_end
+5,CTRL,Blue,5.9,40.57,Diploid,2_end
+5,CTRL,Green,10.6896,42.33,Mated Triploid,2_end
+5,CTRL,Red,16.8384,52.87,Induced Triploid,2_end
+5,CTRL,Blue,10.9326,51.71,Diploid,2_end
+5,CTRL,Blue,14.191,52.1,Diploid,2_end
+4,CTRL,Blue,6.5837,44.55,Diploid,2_end
+4,CTRL,Green,16.4676,59.94,Mated Triploid,2_end
+4,CTRL,Green,12.7961,60.97,Mated Triploid,2_end
+4,CTRL,Red,10.7218,55.81,Induced Triploid,2_end
+4,CTRL,Red,7.6436,44.81,Induced Triploid,2_end
+14,CTRL,Green,25.9144,65.68,Mated Triploid,2_end
+14,CTRL,Green,25.422,54.91,Mated Triploid,2_end
+14,CTRL,Red,9.7629,52.17,Induced Triploid,2_end
+14,CTRL,Red,9.0787,49.84,Induced Triploid,2_end
+14,CTRL,Red,12.7814,52.12,Induced Triploid,2_end
+14,CTRL,Blue,9.1921,51.73,Diploid,2_end
+14,CTRL,Blue,6.5262,46.58,Diploid,2_end
+5,CTRL,Green,25.1812,66.92,Mated Triploid,2_end
+5,CTRL,Red,12.2191,49.89,Induced Triploid,2_end
+14,CTRL,Red,7.9369,48.26,Induced Triploid,2_end
+4,CTRL,Blue,10.1945,46.12,Diploid,2_end
+5,CTRL,Red,12.1693,51.64,Induced Triploid,2_end
+14,CTRL,Blue,7.6611,48.19,Diploid,2_end
+4,CTRL,Blue,9.7881,52.41,Diploid,2_end
+5,CTRL,Green,6.0941,50.66,Mated Triploid,2_end
+5,CTRL,Blue,8.0066,55.46,Diploid,2_end
+14,CTRL,Green,11.1946,53.2,Mated Triploid,2_end
+14,CTRL,Green,6.379,42.74,Mated Triploid,2_end
+5,CTRL,Blue,9.3451,49.96,Diploid,2_end
+5,CTRL,Green,22.0796,69.01,Mated Triploid,2_end
+4,CTRL,Red,14.1868,53.61,Induced Triploid,2_end
+4,CTRL,Blue,10.3067,52.5,Diploid,2_end
+14,CTRL,Blue,8.2187,49.51,Diploid,2_end
+4,CTRL,Green,7.5714,55.85,Mated Triploid,2_end
+4,CTRL,Red,18.1318,45.78,Induced Triploid,2_end
+14,CTRL,Red,9.3829,41.01,Induced Triploid,2_end
+5,CTRL,Red,8.1502,48.38,Induced Triploid,2_end
+5,CTRL,Red,7.1626,44.55,Induced Triploid,2_end
+14,CTRL,Blue,7.5499,51.1,Diploid,2_end
+14,CTRL,Green,6.7299,46.21,Mated Triploid,2_end
+4,CTRL,Green,16.8035,52.23,Mated Triploid,2_end
+4,CTRL,Blue,10.229,42.56,Diploid,2_end
+14,CTRL,Green,5.6774,44.78,Mated Triploid,2_end
+14,CTRL,Red,6.6443,51.47,Induced Triploid,2_end
+5,CTRL,Green,6.025,44.3,Mated Triploid,2_end
+5,CTRL,Blue,8.907,48.44,Diploid,2_end
+4,CTRL,Red,6.9892,43,Induced Triploid,2_end
+4,CTRL,Blue,8.3074,36.98,Diploid,2_end
+5,CTRL,Green,8.5466,43.91,Mated Triploid,2_end
+5,CTRL,Red,9.877,45.92,Induced Triploid,2_end
+4,CTRL,Blue,7.5317,48.6,Diploid,2_end
+4,CTRL,Green,4.3005,40.19,Mated Triploid,2_end
+14,CTRL,Green,4.2043,43.74,Mated Triploid,2_end
+14,CTRL,Red,5.7223,44.52,Induced Triploid,2_end
+14,CTRL,Green,10.6803,53.47,Mated Triploid,2_end
+5,CTRL,Red,11.7133,60.43,Induced Triploid,2_end
+5,CTRL,Green,6.1877,42.34,Mated Triploid,2_end
+14,CTRL,Red,7.7688,51.76,Induced Triploid,2_end
+4,CTRL,Red,6.0344,49.39,Induced Triploid,2_end
+4,CTRL,Red,7.3394,44.12,Induced Triploid,2_end
+5,CTRL,Blue,6.6176,50.6,Diploid,2_end
+14,CTRL,Blue,5.9486,49.72,Diploid,2_end
+4,CTRL,Green,3.6336,33.66,Mated Triploid,2_end
+14,CTRL,Red,5.7436,45.82,Induced Triploid,2_end
+5,CTRL,Blue,9.623,51.82,Diploid,2_end
+5,CTRL,Blue,6.2291,42.33,Diploid,2_end
+4,CTRL,Red,5.5882,40.8,Induced Triploid,2_end
+4,CTRL,Red,5.9777,42.08,Induced Triploid,2_end
+14,CTRL,Blue,7.1592,39.17,Diploid,2_end
+14,CTRL,Blue,5.442,42.55,Diploid,2_end
+5,CTRL,Blue,5.5039,39.11,Diploid,2_end
+6,250,Red,8.5019,46.39,Induced Triploid,2_end
+6,250,Blue,7.3953,47.67,Diploid,2_end
+6,250,Green,13.4879,46.27,Mated Triploid,2_end
+6,250,Blue,6.5065,48.89,Diploid,2_end
+6,250,Green,16.8219,58.97,Mated Triploid,2_end
+6,250,Red,14.095,57.75,Induced Triploid,2_end
+16,250,Green,13.6144,59.74,Mated Triploid,2_end
+16,250,Green,12.0458,61.6,Mated Triploid,2_end
+16,250,Blue,8.8795,54.94,Diploid,2_end
+16,250,Blue,11.8365,53.32,Diploid,2_end
+16,250,Red,17.8526,54.1,Induced Triploid,2_end
+16,250,Red,13.229,52.12,Induced Triploid,2_end
+11,250,Red,14.9752,48.97,Induced Triploid,2_end
+11,250,Red,8.0001,45.66,Induced Triploid,2_end
+11,250,Green,19.227,48.12,Mated Triploid,2_end
+11,250,Green,18.053,59.71,Mated Triploid,2_end
+11,250,Blue,9.9993,50.3,Diploid,2_end
+11,250,Blue,10.6076,49.75,Diploid,2_end
+6,250,Red,10.5046,51.38,Induced Triploid,2_end
+6,250,Blue,18.0886,42.61,Diploid,2_end
+11,250,Green,11.0218,53.01,Mated Triploid,2_end
+11,250,Red,7.4866,48.68,Induced Triploid,2_end
+16,250,Blue,9.4925,55.18,Diploid,2_end
+16,250,Green,9.0595,49.01,Mated Triploid,2_end
+16,250,Red,8.7882,48.66,Induced Triploid,2_end
+16,250,Green,13.6381,59.1,Mated Triploid,2_end
+6,250,Blue,10.1656,53.77,Diploid,2_end
+6,250,Red,11.2756,45.54,Induced Triploid,2_end
+11,250,Green,16.9455,60.27,Mated Triploid,2_end
+11,250,Blue,14.4306,54.14,Diploid,2_end
+11,250,Red,7.4449,44.86,Induced Triploid,2_end
+11,250,Blue,10.2064,49.53,Diploid,2_end
+16,250,Red,8.8221,50.64,Induced Triploid,2_end
+16,250,Blue,12.3265,49.17,Diploid,2_end
+6,250,Green,13.3869,51.14,Mated Triploid,2_end
+6,250,Green,12.1994,44,Mated Triploid,2_end
+2,500,Red,16.6267,51.61,Induced Triploid,2_end
+2,500,Red,10.9632,52.63,Induced Triploid,2_end
+2,500,Blue,7.3987,52.37,Diploid,2_end
+2,500,Blue,9.5775,47.83,Diploid,2_end
+2,500,Green,10.1981,46.94,Mated Triploid,2_end
+2,500,Green,15.9407,55.02,Mated Triploid,2_end
+9,500,Blue,9.3221,49.73,Diploid,2_end
+9,500,Blue,10.0497,46.93,Diploid,2_end
+15,500,Green,21.5076,63.48,Mated Triploid,2_end
+15,500,Green,16.3345,57.79,Mated Triploid,2_end
+9,500,Red,3.9946,37.48,Induced Triploid,2_end
+9,500,Red,6.9189,43.63,Induced Triploid,2_end
+15,500,Blue,8.9048,52.61,Diploid,2_end
+15,500,Blue,6.5727,48.29,Diploid,2_end
+15,500,Green,9.9753,55.9,Mated Triploid,2_end
+15,500,Green,9.4104,53.03,Mated Triploid,2_end
+15,500,Red,11.2529,50.39,Induced Triploid,2_end
+15,500,Red,10.7328,55.48,Induced Triploid,2_end
+2,500,Red,9.4641,44.59,Induced Triploid,2_end
+2,500,Green,10.6182,50.39,Mated Triploid,2_end
+9,500,Blue,7.6964,52.78,Diploid,2_end
+9,500,Red,7.9896,44.27,Induced Triploid,2_end
+15,500,Blue,7.4382,48.28,Diploid,2_end
+15,500,Green,9.4747,50.83,Mated Triploid,2_end
+15,500,Red,7.7138,45.18,Induced Triploid,2_end
+15,500,Red,8.8405,45.15,Induced Triploid,2_end
+2,500,Green,16.9841,58.01,Mated Triploid,2_end
+2,500,Red,12.0989,45.64,Induced Triploid,2_end
+9,500,Red,6.3285,40.86,Induced Triploid,2_end
+15,500,Blue,7.1094,46.69,Diploid,2_end
+9,500,Blue,3.9145,39.52,Diploid,2_end
+2,500,Blue,7.2233,46.28,Diploid,2_end
+2,500,Blue,5.9932,41.95,Diploid,2_end
+2,500,Red,8.7206,38.88,Induced Triploid,2_end
+2,500,Blue,11.0161,54.82,Diploid,2_end
+15,500,Red,12.4838,60.08,Induced Triploid,2_end
+15,500,Green,17.5115,69.81,Mated Triploid,2_end
+9,500,Blue,12.3515,56.44,Diploid,2_end
+9,500,Blue,8.7931,50.55,Diploid,2_end
+15,500,Red,16.048,68.03,Induced Triploid,2_end
+15,500,Green,16.2388,56.57,Mated Triploid,2_end
+9,500,Blue,6.2001,44.57,Diploid,2_end
+9,500,Blue,2.9922,32.02,Diploid,2_end
+2,500,Red,13.0942,55.1,Induced Triploid,2_end
+2,500,Green,18.0868,66.18,Mated Triploid,2_end
+15,500,Red,14.4098,57.2,Induced Triploid,2_end
+15,500,Blue,15.9521,49.19,Diploid,2_end
+15,500,Green,9.6126,50.32,Mated Triploid,2_end
+2,500,Blue,13.7081,56.68,Diploid,2_end
+2,500,Green,12.839,54.7,Mated Triploid,2_end
+9,500,Red,3.0617,29.42,Induced Triploid,2_end
+15,500,Blue,10.035,52.11,Diploid,2_end
+15,500,Green,9.1547,50.32,Mated Triploid,2_end
+15,500,Red,6.6839,40.59,Induced Triploid,2_end
+2,500,Blue,5.9885,38.14,Diploid,2_end
+2,500,Green,11.2143,43.94,Mated Triploid,2_end
+2,500,Red,6.6707,43.77,Induced Triploid,2_end
+2,500,Green,9.5274,50.56,Mated Triploid,2_end
+2,500,Red,5.1844,40.33,Induced Triploid,2_end
+2,500,Blue,6.1709,47.96,Diploid,2_end
+15,500,Blue,10.0144,47.53,Diploid,2_end
+15,500,Blue,8.4751,50.12,Diploid,2_end
+1,750,Green,9.4665,47.85,Mated Triploid,2_end
+1,750,Green,13.338,62.39,Mated Triploid,2_end
+1,750,Blue,5.9191,48.08,Diploid,2_end
+1,750,Blue,4.4004,41.63,Diploid,2_end
+1,750,Red,10.0685,45.58,Induced Triploid,2_end
+1,750,Red,7.7732,46.01,Induced Triploid,2_end
+12,750,Blue,11.3704,50.11,Diploid,2_end
+12,750,Blue,9.2694,54.32,Diploid,2_end
+12,750,Green,6.782,59.21,Mated Triploid,2_end
+12,750,Green,10.642,55.4,Mated Triploid,2_end
+12,750,Red,9.0692,45.55,Induced Triploid,2_end
+12,750,Red,6.7884,47.56,Induced Triploid,2_end
+7,750,Red,9.5634,46.6,Induced Triploid,2_end
+7,750,Red,14.4816,51.93,Induced Triploid,2_end
+7,750,Blue,10.5697,58.11,Diploid,2_end
+7,750,Blue,8.9989,46.62,Diploid,2_end
+7,750,Green,13.2992,9.92,Mated Triploid,2_end
+7,750,Green,20.9656,67.87,Mated Triploid,2_end
+1,750,Red,10.9547,52.45,Induced Triploid,2_end
+1,750,Blue,11.0815,60.28,Diploid,2_end
+12,750,Blue,10.0785,51.11,Diploid,2_end
+12,750,Green,17.6518,55.81,Mated Triploid,2_end
+7,750,Red,10.834,52.6,Induced Triploid,2_end
+7,750,Green,17.4204,61.09,Mated Triploid,2_end
+12,750,Blue,8.6686,53.87,Diploid,2_end
+12,750,Green,9.0472,57.66,Mated Triploid,2_end
+7,750,Red,8.1235,45.07,Induced Triploid,2_end
+7,750,Green,5.6383,43.37,Mated Triploid,2_end
+1,750,Red,8.8439,40.11,Induced Triploid,2_end
+1,750,Green,8.1179,45.76,Mated Triploid,2_end
+7,750,Blue,9.0052,51.66,Diploid,2_end
+7,750,Blue,10.2915,49.18,Diploid,2_end
+12,750,Blue,7.6445,50.97,Diploid,2_end
+12,750,Blue,17.6381,67.87,Diploid,2_end
+1,750,Blue,6.4486,51.15,Diploid,2_end
+1,750,Green,11.6513,56.23,Mated Triploid,2_end
+3,1000,Red,8.8372,49.93,Induced Triploid,2_end
+3,1000,Red,7.4131,4.9,Induced Triploid,2_end
+3,1000,Blue,8.2673,7.22,Diploid,2_end
+3,1000,Blue,10.6633,55.89,Diploid,2_end
+3,1000,Green,6.5217,49.76,Mated Triploid,2_end
+3,1000,Green,22.7608,65.48,Mated Triploid,2_end
+10,1000,Green,6.042,43.09,Mated Triploid,2_end
+10,1000,Green,13.3067,9.87,Mated Triploid,2_end
+10,1000,Red,13.1789,61.87,Induced Triploid,2_end
+10,1000,Red,10.0133,44.28,Induced Triploid,2_end
+10,1000,Blue,10.4878,51.11,Diploid,2_end
+10,1000,Blue,4.5076,38.15,Diploid,2_end
+13,1000,Blue,3.3298,35.18,Diploid,2_end
+13,1000,Blue,6.3586,45.43,Diploid,2_end
+13,1000,Green,13.35,65.77,Mated Triploid,2_end
+13,1000,Green,12.9431,52.93,Mated Triploid,2_end
+13,1000,Red,5.2222,36.29,Induced Triploid,2_end
+13,1000,Red,17.5405,56.43,Induced Triploid,2_end
+3,1000,Blue,8.1924,57.43,Diploid,2_end
+3,1000,Green,9.8258,60.13,Mated Triploid,2_end
+10,1000,Blue,4.8963,48.3,Diploid,2_end
+10,1000,Red,4.9883,36.48,Induced Triploid,2_end
+13,1000,Red,8.4166,46.87,Induced Triploid,2_end
+13,1000,Green,10.8612,59.48,Mated Triploid,2_end
+10,1000,Green,10.86,38.63,Mated Triploid,2_end
+13,1000,Blue,7.0813,45.46,Diploid,2_end
+13,1000,Blue,5.1084,43.74,Diploid,2_end
+13,1000,Green,11.4173,52.16,Mated Triploid,2_end
+3,1000,Red,6.1008,38.58,Induced Triploid,2_end
+3,1000,Red,7.1587,41.82,Induced Triploid,2_end
+3,1000,Green,7.1515,43.73,Mated Triploid,2_end
+13,1000,Green,14.4378,51.11,Mated Triploid,2_end
+3,1000,Red,12.1859,50.59,Induced Triploid,2_end
+3,1000,Green,16.2294,60.88,Mated Triploid,2_end
+10,1000,Blue,13.3636,60.86,Diploid,2_end
+10,1000,Green,10.3802,49.26,Mated Triploid,2_end
+3,1000,Blue,11.1273,53.25,Diploid,2_end
+3,1000,Blue,19.6418,66.27,Diploid,2_end
+3,1000,Red,9.1841,49.99,Induced Triploid,2_end
+10,1000,Red,13.3667,54.82,Induced Triploid,2_end
+10,1000,Blue,5.0275,41.98,Diploid,2_end
+13,1000,Green,9.4048,51.36,Mated Triploid,2_end
+13,1000,Blue,7.5164,44.77,Diploid,2_end
+10,1000,Green,12.9992,58.72,Mated Triploid,2_end
+10,1000,Red,6.9435,42.8,Induced Triploid,2_end
+13,1000,Red,7.0217,45.18,Induced Triploid,2_end
+13,1000,Red,9.0248,44.76,Induced Triploid,2_end
+3,1000,Green,18.075,60.9,Mated Triploid,2_end
+3,1000,Blue,12.4452,56.42,Diploid,2_end
+13,1000,Red,9.5399,44.41,Induced Triploid,2_end
+13,1000,Green,5.773,47.79,Mated Triploid,2_end
+10,1000,Red,4.8751,34.99,Induced Triploid,2_end
+10,1000,Blue,4.0638,29.49,Diploid,2_end
+3,1000,Blue,6.8668,44.32,Diploid,2_end
+3,1000,Red,5.1645,43.63,Induced Triploid,2_end
+3,1000,Red,8.9323,41.79,Induced Triploid,2_end
+3,1000,Green,9.5654,60.52,Mated Triploid,2_end
+3,1000,Blue,8.3201,46.77,Diploid,2_end
+13,1000,Red,5.819,34.73,Induced Triploid,2_end
+13,1000,Green,10.0678,44.94,Mated Triploid,2_end
+13,1000,Blue,5.6351,46.25,Diploid,2_end
+13,1000,Blue,5.28,44.72,Diploid,2_end
