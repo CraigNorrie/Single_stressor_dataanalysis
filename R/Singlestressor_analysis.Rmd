@@ -23,6 +23,8 @@ library(frailtyEM)
 library(lme4)
 library(emmeans)
 library(nlme)
+library(report)
+library(gridExtra)
 ```
 
 # Temperature
@@ -76,21 +78,27 @@ massgrowthlme_temp <- sizedat_temp %>%
 anova(massgrowthlme_temp)
 
 emmeans_massgrowthlme_temp <- emmeans(massgrowthlme_temp, ~ Ploidy*Treatment*Time)
-masscontrasts <- contrast(emmeans_massgrowthlme_temp, adjust = "tukey")
+masscontrasts <- pairs(emmeans_massgrowthlme_temp)
 masscontrastsdf <-  as.data.frame(masscontrasts)
-print(masscontrastsdf %>% filter(p.value <=0.05))
-
+sigpHmasscontrasts <- masscontrastsdf %>% filter(p.value <=0.05)
+write.csv(sigpHmasscontrasts, "sigpHmasscontrasts")
 heightgrowthlme_temp <- lmer(Shell.Height~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
 
 ```
 
 The second step is to examine growth in terms of shell height. 
 ```{r}
-heightgrowthlme_temp <- lmer(log(Shell.Height)~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
-emmeans_heightgrowthlme_temp <- emmeans(heightgrowthlme_temp, ~ Ploidy+Treatment+Time)
-heightcontrasts <- contrast(emmeans_heightgrowthlme_temp)
-heightcontrasts <-  as.data.frame(heightcontrasts)#Change to a df so that I can filter out the results and only show p<0.05
-print(heightcontrasts %>% filter(p.value <=0.05))
+Shell.Heightgrowthlme_temp <- sizedat_temp %>% 
+  lme(log(Shell.Height)~Ploidy*Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(Shell.Heightgrowthlme_temp)
+
+emmeans_Shell.Heightgrowthlme_temp <- emmeans(Shell.Heightgrowthlme_temp, ~ Ploidy*Treatment*Time)
+Shell.Heightcontrasts <- pairs(emmeans_Shell.Heightgrowthlme_temp)
+Shell.Heightcontrastsdf <-  as.data.frame(Shell.Heightcontrasts)
+sigpHShell.Heightcontrasts <- Shell.Heightcontrastsdf %>% filter(p.value <=0.05)
+write.csv(sigpHShell.Heightcontrasts, "sigpHShell.Heightcontrasts")
+heightgrowthlme_temp <- lmer(Shell.Height~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
+
 ```
 
 The results indicate that significant differences existed in the size of.....
@@ -187,6 +195,24 @@ pooled_site_survplot_temp_pooled <- survival_eventdat_temp %>%
   scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
 
 pooled_site_survplot_temp_pooled
+#CReate a long plot to group with the others
+longpooled_site_survplot_temp_pooled <- survival_eventdat_temp %>%
+  filter(Time <= 28) %>%
+  ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+                   facet.by = "Temp",
+                   data = .,
+                   risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+                   legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+                   xlab = "Time (days)",
+                   ylim = c(0.7, 1),
+                   legend.strata = FALSE, 
+                   legend.title = "Ploidy",
+                   ncol = 1) +  # Setting ncol to 1 to have one column of facets
+  theme_bw(base_size = 20) +
+  labs(legend = "ploidy") +
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50")) +
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
 ```
 
 Plot the survival across tanks
@@ -263,11 +289,25 @@ survival_eventdat_temp %>% emfrail(surv_temp ~ Temp*Colour + cluster(Tank),
 ## Respiration
 [Ding et al 2020](https://doi.org/10.3389/fmars.2020.00399) and [Bodenstein](https://www.frontiersin.org/articles/10.3389/fmars.2023.1194296/full) used ANOVAs to compare respiration rates.I will do a linear mixed model where I examine interactions between the environment, ploidy, and whether a heat shock or not has occured. I will include tank as a random factor to account for any potential between tank variation. 
 
-Read in the respiration data
+### Read in the respiration data
 
 ```{r}
-#make the rates column positive
+temp_resprates <- read.csv(here("Data", "Temperature", "temp_masscorrectedrates.csv")) %>% 
+  select(Ploidy, Treatment, Tank, mass_corected_rate)
+temp_resprates$mass_corected_rate <- temp_resprates$mass_corected_rate *-1#make the rates column positive
+#Replace the negatives with zero
+temp_resprates <- temp_resprates %>% mutate(mass_corected_rate = pmax(mass_corected_rate, 0))
 ```
+
+### Create plots for the data
+
+Summarise the data 
+
+```{r}
+temprates_summary <- temp_resprates %>% group_by(Treatment, Ploidy) %>% 
+  summarise(temp_mean_resprate= mean(mass_corected_rate, na.rm = TRUE), sem_temp_resprate = sd(mass_corected_rate, na.rm = TRUE)/n())
+```
+
 
 Calculate an oxygen consumption rate per gram per gram. This is to determine if smaller/larger individuals consume more oxygen per gram when they are smaller/larger. Similar to [McElhany et al. 2023](https://www.sciencedirect.com/science/article/pii/S0022098122000892?via%3Dihub)
 # pH
@@ -301,6 +341,46 @@ pHsizedat %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time.point))+geom_boxplot()+
 #   facet_wrap(~Treatment)
 ```
 
+### Statistical analysis of growth data
+Linear mixed model using tank as a random factor. Even though tank is unlikley to be of importance. 
+
+Check the distribution of the data
+```{r}
+hist((pHsizedat$Mass))
+hist((pHsizedat$Height))
+#Log the data
+hist(log(pHsizedat$Mass))#Mass should be logged but not height
+```
+
+Start with the mass model
+
+```{r}
+massgrowthlme_pH <- pHsizedat %>% 
+  lme(log(Mass)~Ploidy*Time.point*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(massgrowthlme_pH)
+
+emmeans_massgrowthlme_pH <- emmeans(massgrowthlme_pH, ~ Ploidy)
+masscontrasts <- pairs(emmeans_massgrowthlme_pH)
+masscontrasts
+```
+
+Ploidy was the only significant factor with regards to mass. Pairwise comparisons show that mated trips were heavier than the other two groups.
+
+Now create a shell height model
+```{r}
+heightgrowthlme_pH <- pHsizedat %>% 
+  lme((Height)~Ploidy*Time.point*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(heightgrowthlme_pH)
+#Time point and ploidy are signifcant here, but there are no interactions
+emmeans_heightgrowthlme_pH <- emmeans(heightgrowthlme_pH, ~ Ploidy+Time.point+Ploidy:Treatment)
+heightcontrasts_pH <- pairs(emmeans_heightgrowthlme_pH)
+heightcontrasts_pH
+#output this data
+heightcontrastsdf_pH <-  as.data.frame(heightcontrasts_pH)
+sigheightcontrastsdf_pH <- heightcontrastsdf_pH %>% filter(p.value <=0.05)
+write.csv(sigheightcontrastsdf_pH, "sigheightcontrasts_pH.csv")
+```
+No signifcant differences were observed between start and end sizes for any of the shell heights within ploidies and treatments. 
 
 ## Mortality
 
@@ -417,6 +497,28 @@ pooled_site_survplot_pH_pooled <- survival_eventdat_pH %>%
   scale_color_manual(values = c("#CD950C","#00688B", "#8B0A50"))+
   scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
 pooled_site_survplot_pH_pooled
+
+#MAke it long to see all plots
+pooled_site_survplot_pH_pooled <- factor(survival_eventdat_pH$CO2_level, levels = c("0", "250", "500", "750", "1000"))#Set the order of the facets 
+survival_eventdat_pH$Date1 <- survival_eventdat_pH$Date+3#The sampling events were off by 1 day
+longpooled_site_survplot_pH_pooled <- survival_eventdat_pH %>% 
+ ggsurvplot_facet(survfit(Surv(Date1, event, type = "right") ~ Colour , data = .),
+            facet.by = "CO2_level",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy",
+            ncol=1)+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#CD950C","#00688B", "#8B0A50"))+
+  scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
+longpooled_site_survplot_pH_pooled
+
+
 ```
 
 Here I am going to see how different ploidies reacted to the same pH treatment. The same data as above (i.e. pooled) but faceted by ploidy rather than CO2
@@ -546,6 +648,7 @@ pHcurve_nohs <- pHresprates_summary %>%
 pHcurve_nohs #THIS WAS EXPORTED AT A SIZE OF 10x12 Inches
 
 
+
 ```
 
 ### Statistical analysis
@@ -623,6 +726,66 @@ qqline(residuals)
 # DO 
 
 ## Growth
+```{r}
+sizedat_DO <- read.csv(here("Data", "DO", "DO_SIZE_DATA.csv"))
+
+sizedat_DO <- sizedat_DO %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time"), as.factor)) %>% 
+  mutate(across(c("Mass", "Shell.Height"), as.numeric))
+
+```
+
+Plot the sizes at the start and end of the experiment
+
+```{r}
+sizedat_DO %>% #filter(Treatment != 100) %>% 
+  ggplot(aes(x=Ploidy, y= Mass, fill = Time))+geom_boxplot()+facet_wrap(~Treatment)+
+  theme_bw(base_size = 20)+scale_fill_manual(values = c("red", "blue"), breaks = unique(sizedat_temp$Time), labels = c("Start", "End"))+
+  scale_x_discrete(labels = c("Diploids", "Induced Triploids", "Mated Triploids"))+
+  ylab("Mass (g)")
+```
+
+### Statistical analysis of growth data
+Linear mixed model using tank as a random factor. Even though tank is unlikley to be of importance. 
+
+Check the distribution of the data
+```{r}
+hist(sizedat_DO$Mass)
+hist(log(sizedat_DO$Mass))
+
+hist(sizedat_DO$Shell.Height) #Better to keep  this untransformed, 
+#hist(log(sizedat_DO$Shell.Height))
+```
+
+
+```{r}
+massgrowthlme_DO <- sizedat_DO %>% 
+  lme(log(Mass)~Ploidy*Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(massgrowthlme_DO)
+
+emmeans_massgrowthlme_DO <- emmeans(massgrowthlme_DO, ~ Ploidy*Treatment)
+masscontrasts <- pairs(emmeans_massgrowthlme_DO)
+masscontrasts
+masscontrasts_df <- as.data.frame(masscontrasts)
+write.csv(filter(masscontrasts_df, p.value<0.05), "DO_masscontrasts.csv")
+```
+
+There was a signifcant ploidy*treatment interaction. However within each ploidy and treatment there were no differences in the size of individuals between the start and the end of the experiment. No impact of DO on growth.
+
+Repeat the same thing for shell height
+```{r}
+heightgrowthlme_DO <- sizedat_DO %>% filter(Shell.Height!= "NA") %>% 
+  lme((Shell.Height)~Ploidy*Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
+anova(heightgrowthlme_DO)
+
+emmeans_heightgrowthlme_DO <- emmeans(heightgrowthlme_DO, ~ Ploidy*Treatment)
+heightcontrasts <- pairs(emmeans_heightgrowthlme_DO)
+heightcontrasts
+heightcontrasts_df <- as.data.frame(masscontrasts)
+write.csv(filter(heightcontrasts_df, p.value<0.05), "DO_heightcontrasts.csv")
+```
+
+Although there was a significant ploidy*treatment interaction there were no signifcant differences in shell height between the start and the end of the experiment in any of the groups observed. 
 
 ## Mortality
 
@@ -713,6 +876,27 @@ pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>
   scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
   scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
 pooled_site_survplot_DO_pooled
+
+#Do it long to see the comparisons
+longpooled_site_survplot_DO_pooled <- pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>% 
+  #filter(DO != 100) %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "DO",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE,
+            ncol = 1)+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
+
+
+grid.arrange(longpooled_site_survplot_temp_pooled,longpooled_site_survplot_DO_pooled, longpooled_site_survplot_pH_pooled, ncol = 3)
 ```
 
 Facet by Tank
@@ -803,6 +987,9 @@ DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>%
 Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.Physiological curves for heat shocked individuals. 
 
 ```{r}
+#Switch the order of the O2 concentrations to match the pH from least stresful to most stresful
+DO_resp_summarytable$O2 <- factor(DO_resp_summarytable$O2, levels = c("9.57", "7.66", "5.74", "3.83", "1.91"))
+#Plot data
 PhyscurvDO <- DO_resp_summarytable %>% 
   filter(O2 != "9.57") %>% 
   ggplot(aes(x=O2, y= mean_rate, group = Ploidy, colour = Ploidy))+geom_line(size = 1)+#base graph
@@ -879,7 +1066,7 @@ emmeans_results <- emmeans(DOrespglm, pairwise ~ Ploidy, adjust = "tukey")
 summary(emmeans_results)
 ```
 
-Diploids consume signifcantly moe oxygen than mated triploids, but there was no difference between any of the other groups in the non heat shocked group.
+Diploids consume signifcantly more oxygen than mated triploids, but there was no difference between any of the other groups in the non heat shocked group.
 
 
 ####  heat shocked
