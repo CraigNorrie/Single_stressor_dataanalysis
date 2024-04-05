@@ -1,0 +1,552 @@
+---
+title: "Data analysis of laboratroy experiments on diploid and triploid pacific oysters"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  html_notebook: default
+editor_options:
+  chunk_output_type: console
+---
+
+This is a notebook for the analysis of growth, mortality, and oxygen consumption data from the single stressor experiments examining the impact of pH, temperature, and DO levels on pacific oysters.
+
+# Packages
+
+```{r, results='hide'}
+library(MASS)
+library(tidyverse)
+library(here)
+library(survival)
+library(ggfortify)
+library(ggsurvfit)
+library(survminer)
+library(gridExtra)
+library(frailtyEM)
+library(lme4)
+library(emmeans)
+library(nlme)
+library(report)
+library(gridExtra)
+```
+
+# Temperature
+
+Read in the mortality data and prepare it for analysis
+
+```{r, results='hide', echo=FALSE}
+temp_survivors <- read.csv(here("Data", "Temperature", "Temp__survivors.csv"))
+temp_survivors$Tank <- as.factor(temp_survivors$Tank)
+temp_tank_assignments <- read.csv(here("Data", "Temperature", "Temp_tank_assignments.csv"))
+#Uncount each of the rows in the first survivor colum
+individ_mortdat_temp <- temp_survivors %>%
+  select(1:3) %>%
+  uncount(weights = Surv_1)
+individ_mortdat_temp$ID <- rep(1:30, length.out = nrow(individ_mortdat_temp))#Add an ID column so each individual has a unique ID
+
+individ_mortdat_temp$status_Surv_0 <- 0
+
+#Create a df to store all survival event data for analyes
+survival_eventdat_temp <- individ_mortdat_temp
+
+#create a for loop that gives all survivors a status across all
+for (i in 3:31) {
+  # Extract the current column name
+  current_column_name <- colnames(temp_survivors)[i]
+  
+  # Remove "Survivors_" from the current column name
+  stripped_column_name <- current_column_name
+  
+  # Create a new column name based on the stripped current column name
+  new_column_name <- paste0("status_", stripped_column_name)
+  
+  # Uncount the specified column
+  survivors_column <- temp_survivors[c(1:2, i)] %>%
+    mutate(weights = as.numeric(get(current_column_name))) %>%
+    uncount(weights)
+  
+  # Add an ID column from 1 to 15
+  survivors_column <- survivors_column %>%
+    group_by(across(c(1, 2))) %>%
+    mutate(ID = row_number()) %>%
+    ungroup()
+  
+  # Add a status column to indicate that these individuals are alive
+  survivors_column[[new_column_name]] <- 0
+  
+  # Join the data frames
+  survival_eventdat_temp <- left_join(survival_eventdat_temp, survivors_column, by = c("Tank", "Colour", "ID"))
+}
+ 
+#Select the columns that status at the begining
+survival_eventdat_temp <- survival_eventdat_temp %>% select(-starts_with("Surv"))
+#Now need to pivot longer for survival plots
+survival_eventdat_temp <- survival_eventdat_temp %>% pivot_longer(cols= -c(1:3), names_to = "Time", values_to = "Status")
+#Remove the status from the time column
+survival_eventdat_temp <- survival_eventdat_temp %>% mutate(Time = gsub("status_Surv_", "", Time))
+#Add 1 where there is a NA
+survival_eventdat_temp$Status[is.na(survival_eventdat_temp$Status)] <- 1
+#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).
+survival_eventdat_temp <- survival_eventdat_temp %>%
+  group_by(Tank, Colour, ID) %>%
+  filter(row_number() <= which.max(Status == 1) | sum(Status == 1) == 0) %>% ungroup()
+#Make sure that the sum of mortality events actually matches the number of mortalities. In the temperature experiment this was 20
+survival_eventdat_temp$event <- survival_eventdat_temp$Status
+survival_eventdat_temp$Time <- as.numeric(survival_eventdat_temp$Time)
+sum(survival_eventdat_temp$Status)
+#Merge the file with the list of treatment tanks
+survival_eventdat_temp <- merge(survival_eventdat_temp, temp_tank_assignments, by = "Tank")
+
+survival_eventdat_temp$Colour <- as.factor(survival_eventdat_temp$Colour)
+```
+
+### Plot the data
+Now the the data is in the correct format I can ployt the mortality. Beacuse mortality was so low this will not be a very interesting plot. This shows pooled mortality across temperature treatments
+
+```{r, echo=FALSE}
+survival_eventdat_temp$Temp <- factor(survival_eventdat_temp$Temp, levels = c("7.5", "12.5", "17.5", "22.5", "27.5"))#Set the order for the facets
+pooled_site_survplot_temp_pooled <- survival_eventdat_temp %>% 
+  filter(Time <= 28) %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "Temp",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
+pooled_site_survplot_temp_pooled
+#CReate a long plot to group with the others
+longpooled_site_survplot_temp_pooled <- survival_eventdat_temp %>%
+  filter(Time <= 28) %>%
+  ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+                   facet.by = "Temp",
+                   data = .,
+                   risk.table = FALSE, pval = FALSE, conf.int = FALSE, 
+                   legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+                   xlab = "Time (days)",
+                   ylim = c(0.7, 1),
+                   legend.strata = FALSE, 
+                   legend.title = "Ploidy",
+                   ncol = 1) +  # Setting ncol to 1 to have one column of facets
+  theme_bw(base_size = 20) +
+  labs(legend = "ploidy") +
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50")) +
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
+```
+
+Plot the survival across tanks
+
+```{r, echo=FALSE}
+pooled_site_survplot_temp_Tank <- survival_eventdat_temp %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "Tank",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.6, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 15)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("blue", "green", "red"))+
+  scale_fill_manual(values = c("blue", "green", "red"))
+pooled_site_survplot_temp_Tank
+```
+
+And finally the same plot, except faceted by Ploidy.
+
+```{r, echo=FALSE}
+pooled_site_survplot_temp_Ploidy <- survival_eventdat_temp %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Temp , data = .),
+            facet.by = "Colour",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             #ylim = c(0.6, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 20)
+  #labs(legend = "ploidy")+
+  #scale_color_manual(values = c("blue", "green", "red"))+
+  #scale_fill_manual(values = c("blue", "green", "red"))
+pooled_site_survplot_temp_Ploidy
+```
+
+### Perform statistical analyses
+
+Using the surv package in R I am going to analyse the data. First creating a Kaplan Meyer survival object and then examining the potential different models
+```{r}
+#Create a survival object for analyses
+surv_temp <- with(survival_eventdat_temp, Surv(Time, event, type = "right"))#For some reason piping does not work here
+#Create the survival models
+K1_temp <- coxph(surv_temp ~ Temp , data = survival_eventdat_temp)
+K2_temp <- coxph(surv_temp ~ Colour , data = survival_eventdat_temp)
+K3_temp <- coxph(surv_temp ~ Colour + Temp, data = survival_eventdat_temp)
+K4_temp <- coxph(surv_temp ~ Colour * Temp, data = survival_eventdat_temp)
+
+summary(K1_temp)
+summary(K2_temp)
+summary(K3_temp)
+summary(K4_temp)
+```
+
+
+# pH
+
+Read in the mortality data and prepare it for analysis. This involves changing the data from being only number of moralities at each sampling event to giving each individual a status. This is a lot of code to do not very much
+
+```{r, echo=FALSE}
+pH_mortdat <- read.csv(here("Data", "pH", "pH_mortality.csv"))
+pH_mortdattemplate <- read.csv(here("Data", "pH", "Mortality_template.csv"))
+pH_tanktrt <- read.csv(here("Data", "pH", "pH_Tank_assignments.csv"))
+pH_mortdat$Tank <- as.factor(pH_mortdat$Tank)
+pH_mortdattemplate$Tank <- as.factor(pH_mortdattemplate$Tank)
+#merge the data with the tempalate
+ph_mortdat_expanded <- left_join(pH_mortdattemplate, pH_mortdat, by = c("Tank", "Date", "Colour"))
+#Replace the NAs with zeros
+ph_mortdat_expanded <- ph_mortdat_expanded %>%
+  mutate(Number_Morts = ifelse(is.na(Number_Morts), 0, Number_Morts))
+#Now need to pivot wider to get the dates so we can subtract the dates
+ph_mortdat_expanded <- ph_mortdat_expanded %>% pivot_wider(id_cols = c(Tank, Colour),
+                                                           names_from='Date',
+                                                           values_from='Number_Morts')
+#Add a new collumn that has the total number per group at the start of the experiment (Think it was 15)
+ph_mortdat_expanded$Survivors_Nov_2 <- 15-ph_mortdat_expanded$Nov_02
+
+#calculate survivors at each time interval 
+for (i in 4:10) {
+  survivors <- ph_mortdat_expanded[, i+7] - ph_mortdat_expanded[, i]
+  # Create new column name
+  new_column_name <- paste0("Survivors_", colnames(ph_mortdat_expanded)[i])
+  # Add new column with survivors
+  ph_mortdat_expanded[, new_column_name] <- survivors
+}
+
+#now I need to create a df with 15 rows for each of the tanks and ploidys
+ph_mortdat_expanded_repeated <- ph_mortdat_expanded %>%
+  mutate(row_id = row_number()) %>%
+  slice(rep(row_id, each = 15)) %>% 
+  dplyr::select(1,2)
+#Now add in an id column where we repeat 1-15 for each tank
+ph_mortdat_expanded_repeated$ID <- rep(1:15, length.out = nrow(ph_mortdat_expanded_repeated))
+#add a status for the start of teh experiment, 0 indicates an indivvidual was alive 
+ph_mortdat_expanded_repeated$status_Sep_30 <- 0
+
+#Create a df to store all survival event data for analyes####################I FUCKED THIS UP SOMEHOW, GO BACK AND FIX IT#################!!!!!
+for (i in 11:18) {
+  # Extract the current column name
+  current_column_name <- colnames(ph_mortdat_expanded)[i]
+  
+  # Remove "Survivors_" from the current column name
+  stripped_column_name <- gsub("Survivors_", "", current_column_name)#Here I should remove "surv" from name
+  
+  # Create a new column name based on the stripped current column name
+  new_column_name <- paste0("status_", stripped_column_name)
+  
+  # Uncount the specified column ###################THIS IS WHERE THINGS GO WRONG HERE###################
+  survivors_column <- ph_mortdat_expanded[c(1:2, i)] %>%
+    mutate(weights = as.numeric(get(current_column_name))) %>%
+    uncount(weights)
+  
+  # Add an ID column from 1 to 15
+  survivors_column <- survivors_column %>%
+    group_by(across(c(1, 2))) %>%
+    mutate(ID = row_number()) %>%
+    ungroup()
+  
+  # Add a status column to indicate that these individuals are alive
+  survivors_column[[new_column_name]] <- 0
+  
+  # Join the data frames
+  ph_mortdat_expanded_repeated <- left_join(ph_mortdat_expanded_repeated, survivors_column, by = c("Tank", "Colour", "ID"))
+}
+
+#Now select only the coluimns that have the status
+survival_eventdat_pH <- ph_mortdat_expanded_repeated %>% select(-starts_with("Surv"))
+#Pivot longer 
+survival_eventdat_pH <- survival_eventdat_pH %>% pivot_longer(cols= -c(1:3), names_to = "Time", values_to = "Status")
+#Remove the added dates from the time columns
+survival_eventdat_pH <- survival_eventdat_pH %>% mutate(Time = gsub("status_Nov_", "", Time))
+survival_eventdat_pH <- survival_eventdat_pH %>% mutate(Time = gsub("status_Sep_30", "0", Time))
+#Add 1 where there is a NA
+survival_eventdat_pH$Status[is.na(survival_eventdat_pH$Status)] <- 1
+#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).
+survival_eventdat_pH <- survival_eventdat_pH %>%
+  group_by(Tank, Colour, ID) %>%
+  filter(row_number() <= which.max(Status == 1) | sum(Status == 1) == 0) %>% ungroup()
+#Add an "event column
+survival_eventdat_pH$event <- survival_eventdat_pH$Status
+survival_eventdat_pH$Date <- as.numeric(survival_eventdat_pH$Time)
+#Make sure that the sum of mortality events actually matches the number of mortalities. In the temperature experiment this was 250
+sum(survival_eventdat_pH$Status)
+#Join the CO2 data so we have a CO2 Level for each of our variables
+survival_eventdat_pH <- merge(survival_eventdat_pH,pH_tanktrt, by = "Tank")
+
+```
+
+### Plot the data to visualise mortality between tanks
+
+This plot shows pooled survival across pH treatments. This does not account for any random effects of tank that could influence survival. Just a starting point to get an overview of the data. 
+
+```{r, echo=FALSE}
+survival_eventdat_pH$CO2_level <- factor(survival_eventdat_pH$CO2_level, levels = c("0", "250", "500", "750", "1000"))#Set the order of the facets 
+survival_eventdat_pH$Date1 <- survival_eventdat_pH$Date+3#The sampling events were off by 1 day
+pooled_site_survplot_pH_pooled <- survival_eventdat_pH %>% 
+ ggsurvplot_facet(survfit(Surv(Date1, event, type = "right") ~ Colour , data = .),
+            facet.by = "CO2_level",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#CD950C","#00688B", "#8B0A50"))+
+  scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
+pooled_site_survplot_pH_pooled
+
+#MAke it long to see all plots
+pooled_site_survplot_pH_pooled <- factor(survival_eventdat_pH$CO2_level, levels = c("0", "250", "500", "750", "1000"))#Set the order of the facets 
+survival_eventdat_pH$Date1 <- survival_eventdat_pH$Date+3#The sampling events were off by 1 day
+longpooled_site_survplot_pH_pooled <- survival_eventdat_pH %>% 
+ ggsurvplot_facet(survfit(Surv(Date1, event, type = "right") ~ Colour , data = .),
+            facet.by = "CO2_level",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy",
+            ncol=1)+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#CD950C","#00688B", "#8B0A50"))+
+  scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
+longpooled_site_survplot_pH_pooled
+
+
+```
+
+Here I am going to see how different ploidies reacted to the same pH treatment. The same data as above (i.e. pooled) but faceted by ploidy rather than CO2
+
+```{r, echo=FALSE}
+pooled_site_survplot_pH_ploidy <- survival_eventdat_pH %>% 
+ ggsurvplot_facet(survfit(Surv(Date, event, type = "right") ~ CO2_level , data = .),
+            facet.by = "Colour",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE,
+            ylim = c(0.6, 1),
+            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+            legend.strata = FALSE,
+            legend.title = "pCO2")+
+  theme_bw(base_size = 15)
+  #labs(legend = "ploidy")+
+  #scale_color_manual(values = c("blue", "green", "red"))+
+  #scale_fill_manual(values = c("blue", "green", "red"))
+pooled_site_survplot_pH_ploidy
+```
+
+
+To see how survival varied across tanks this is a plot that shows the survival probability for each ploidy group across tanks.
+
+```{r, echo=FALSE}
+pooled_site_survplot_pH_tank <- survival_eventdat_pH %>% 
+ ggsurvplot_facet(survfit(Surv(Date, event, type = "right") ~ Colour , data = .),
+            facet.by = "Tank",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.6, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 15)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("blue", "green", "red"))+
+  scale_fill_manual(values = c("blue", "green", "red"))
+pooled_site_survplot_pH_tank
+```
+
+### Statistical analysis on the mortality data
+
+First I am going to do a pooled analysis on all the data. This does not include a random effect of tank which I will include later. Using a cox proportional hazards model based on the analysis of McElhany. 
+
+```{r, echo=FALSE}
+#Create a survival object for analyses
+surv_pH <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
+#Create the survival models
+K1_pH <- coxph(surv_pH ~ CO2_level , data = survival_eventdat_pH)
+K2_pH <- coxph(surv_pH ~ Colour , data = survival_eventdat_pH)
+K3_pH <- coxph(surv_pH ~ Colour + CO2_level, data = survival_eventdat_pH)
+K4_pH <- coxph(surv_pH ~ Colour * CO2_level, data = survival_eventdat_pH)
+
+summary(K1_pH)
+summary(K2_pH)
+summary(K3_pH)
+summary(K4_pH)
+```
+
+Results of these analyses show that there was as significant impact of pCO2 and ploidy on survival (when pooled). Significant interactions existed between ploidy and pCO2 levels. The graphs show that blue did not survive well in the highest pH treatement. 
+
+I am going to add a random effect of tank here to assess inter tank variation. I am using the frailtyEM package (Balan and Putter 2019) as in McElhany crab survival analysis. I am going to include treatment and ploidy as fixed effects tank as a random effect. I have no idea if this is correct or how to interpret it. 
+
+```{r}
+survival_eventdat_pH1 <- survival_eventdat_pH %>% mutate(across(c("CO2_level","Tank", "Colour"), as.factor)) 
+survival_eventdat_pH1$Time <- as.numeric(survival_eventdat_pH1$Time)
+survival_eventdat_pH1$Time <- survival_eventdat_pH1$Time+1
+pH_frailty_fit <- survival_eventdat_pH1 %>% emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank),
+distribution = emfrail_dist(dist = "gamma"),
+data = .)
+
+pH_frailty_fit
+```
+
+# DO
+## Mortality
+
+Read in the mortality data, and format it so that I can run survival analyses. 
+```{r}
+DO_survivors <- read.csv(here("Data", "DO", "DO__survivors.csv"))
+DO_survivors$Tank <- as.factor(DO_survivors$Tank)
+DO_tank_assignments <- read.csv(here("Data", "DO", "DO_tank_assignments.csv"))
+#Uncount each of the rows in the first survivor colum
+individ_mortdat_DO <- DO_survivors %>%
+  select(1:3) %>%
+  uncount(weights = Surv_1)
+individ_mortdat_DO$ID <- rep(1:30, length.out = nrow(individ_mortdat_DO))#Add an ID column so each individual has a unique ID
+
+individ_mortdat_DO$status_Surv_0 <- 0
+
+#Create a df to store all survival event data for analyes
+survival_eventdat_DO <- individ_mortdat_DO
+
+#create a for loop that gives all survivors a status across all
+for (i in 3:34) {
+  # Extract the current column name
+  current_column_name <- colnames(DO_survivors)[i]
+  
+  # Remove "Survivors_" from the current column name
+  stripped_column_name <- current_column_name
+  
+  # Create a new column name based on the stripped current column name
+  new_column_name <- paste0("status_", stripped_column_name)
+  
+  # Uncount the specified column
+  survivors_column <- DO_survivors[c(1:2, i)] %>%
+    mutate(weights = as.numeric(get(current_column_name))) %>%
+    uncount(weights)
+  
+  # Add an ID column from 1 to 15
+  survivors_column <- survivors_column %>%
+    group_by(across(c(1, 2))) %>%
+    mutate(ID = row_number()) %>%
+    ungroup()
+  
+  # Add a status column to indicate that these individuals are alive
+  survivors_column[[new_column_name]] <- 0
+  
+  # Join the data frames
+  survival_eventdat_DO <- left_join(survival_eventdat_DO, survivors_column, by = c("Tank", "Colour", "ID"))
+}
+ 
+#Select the columns that status at the begining
+survival_eventdat_DO <- survival_eventdat_DO %>% select(-starts_with("Surv"))
+#Now need to pivot longer for survival plots
+survival_eventdat_DO <- survival_eventdat_DO %>% pivot_longer(cols= -c(1:3), names_to = "Time", values_to = "Status")
+#Remove the status from the time column
+survival_eventdat_DO <- survival_eventdat_DO %>% mutate(Time = gsub("status_Surv_", "", Time))
+#Add 1 where there is a NA
+survival_eventdat_DO$Status[is.na(survival_eventdat_DO$Status)] <- 1
+#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).
+survival_eventdat_DO <- survival_eventdat_DO %>%
+  group_by(Tank, Colour, ID) %>%
+  filter(row_number() <= which.max(Status == 1) | sum(Status == 1) == 0) %>% ungroup()
+#Make sure that the sum of mortality events actually matches the number of mortalities. In the DOerature experiment this was 20
+survival_eventdat_DO$event <- survival_eventdat_DO$Status
+survival_eventdat_DO$Time <- as.numeric(survival_eventdat_DO$Time)
+sum(survival_eventdat_DO$Status)
+#Merge the file with the list of treatment tanks
+survival_eventdat_DO <- merge(survival_eventdat_DO, DO_tank_assignments, by = "Tank")
+
+
+```
+
+Plot the mortality between tanks faceted by DO level
+
+```{r}
+survival_eventdat_DO$DO <- factor(survival_eventdat_DO$DO, levels = c("20", "40", "60", "80", "100"))#Set#Order the facets
+pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>% 
+  filter(DO != 100) %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "DO",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+pooled_site_survplot_DO_pooled
+
+#Do it long to see the comparisons
+longpooled_site_survplot_DO_pooled <- pooled_site_survplot_DO_pooled <- survival_eventdat_DO %>% filter(Time <= 28) %>% 
+  filter(DO != 100) %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "DO",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            legend.labs = c("Induced Triploid","Diploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.7, 1),
+            legend.strata = FALSE,
+            ncol = 1)+
+  theme_bw(base_size = 20)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("#00688B", "#CD950C", "#8B0A50"))+
+  scale_fill_manual(values = c("#00688B", "#CD950C", "#8B0A50"))
+
+
+
+#grid.arrange(longpooled_site_survplot_temp_pooled,longpooled_site_survplot_DO_pooled, longpooled_site_survplot_pH_pooled, ncol = 3)
+```
+
+Facet by Tank
+
+```{r}
+pooled_site_survplot_DO_pooled_tank <- survival_eventdat_DO %>% 
+ ggsurvplot_facet(survfit(Surv(Time, event, type = "right") ~ Colour , data = .),
+            facet.by = "Tank",
+            data = .,
+            risk.table = FALSE, pval = FALSE, conf.int = TRUE, 
+            #legend.labs = c("Diploid", "Induced Triploid", "Mated Triploid"),
+            xlab = "Time (days)",
+             ylim = c(0.6, 1),
+            legend.strata = FALSE, 
+            legend.title = "Ploidy")+
+  theme_bw(base_size = 15)+
+  labs(legend = "ploidy")+
+  scale_color_manual(values = c("blue", "green", "red"))+
+  scale_fill_manual(values = c("blue", "green", "red"))
+pooled_site_survplot_DO_pooled_tank
+```
+
+Facet by ploidy
+
