@@ -200,12 +200,25 @@ summary(K3_temp)
 summary(K4_temp)
 ```
 
+Here I am going to do a frailty analysis where tank is included as a random factor (same as a lmm with a randon factor)
+```{r}
+survival_eventdat_temp1 <- survival_eventdat_temp %>% mutate(across(c("Temp","Tank", "Colour"), as.factor)) 
+survival_eventdat_temp1$Time <- as.numeric(survival_eventdat_temp1$Time)
+survival_eventdat_temp1$Time <- survival_eventdat_temp1$Time+1
+temp_frailty_fit <- survival_eventdat_temp1 %>% emfrail(Surv(Time, event, type = "right") ~ Temp*Colour + cluster(Tank),
+distribution = emfrail_dist(dist = "gamma"),
+data = .)
+
+temp_frailty_fit
+```
+
+
 
 # pH
 
 Read in the mortality data and prepare it for analysis. This involves changing the data from being only number of moralities at each sampling event to giving each individual a status. This is a lot of code to do not very much
 
-```{r, echo=FALSE}
+```{r, results='hide', echo=FALSE}
 pH_mortdat <- read.csv(here("Data", "pH", "pH_mortality.csv"))
 pH_mortdattemplate <- read.csv(here("Data", "pH", "Mortality_template.csv"))
 pH_tanktrt <- read.csv(here("Data", "pH", "pH_Tank_assignments.csv"))
@@ -385,7 +398,7 @@ pooled_site_survplot_pH_tank
 
 First I am going to do a pooled analysis on all the data. This does not include a random effect of tank which I will include later. Using a cox proportional hazards model based on the analysis of McElhany. 
 
-```{r, echo=FALSE}
+```{r}
 #Create a survival object for analyses
 surv_pH <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
 #Create the survival models
