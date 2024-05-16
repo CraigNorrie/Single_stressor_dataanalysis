@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Single stressor data analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Single stressor data analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Single stressor data analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="Single stressor data analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="Single stressor data analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Single stressor data analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Single stressor data analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Single stressor data analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Single stressor data analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Single stressor data analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Single stressor data analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Single stressor data analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Analysis of growth, oxygen consumption, and survival data collected from laboratory experiments that held diploid and triploid C. gigas under 5 levels of temperature, pH, and, disolved oxygen.<br><br> Individuals were held for a period of 4 weeks under these conditions.</p>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<p>Several packages are used to analyse this data. To see these click “show code”</p>
+<div class="cell" data-warnings="hide">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggsurvfit)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survminer)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(frailtyEM)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(report)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="growth-analyses" class="level1">
+<h1>Growth analyses</h1>
+<p>High mortality occurred in the pH experiment, thus we are only examining if a difference in mean mass and shell height between the start and the end of the experiment.</p>
+<section id="temperature-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="temperature-experiment">Temperature experiment</h2>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sizedat_temp <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Temperature"</span>, <span class="st">"Size_Temperature.csv"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sizedat_temp <span class="ot">&lt;-</span> sizedat_temp <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">"Treatment"</span>,<span class="st">"Tank"</span>, <span class="st">"Ploidy"</span>, <span class="st">"Time"</span>, <span class="st">"Tag.colour"</span>, <span class="st">"Tag.num"</span>), as.factor)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visualising-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-the-data">Visualising the data</h3>
+<p><a href="#fig-temp_height" class="quarto-xref">Figure&nbsp;1</a> and <a href="#fig-temp_mass" class="quarto-xref">Figure&nbsp;2</a> show the size of individuals at the start and end of the temperature experiment.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_height" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_height-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Shell height of each ploidy group at the start and end of the experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_mass" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_mass-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Mass of each ploidy group at the start and end of the experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The smaller shell height at the conclusion of the experiment was likley due to parts of the shell being chipped off or inaccuracies in measurements. <br> We observe the mean mass increase over the course of the experiment in all (<a href="#fig-temp_mass" class="quarto-xref">Figure&nbsp;2</a>) ploidies held at 7.5 °C, 12.5 °C, and 17.5 °C but minimal changes in mass in the 22.5 °C and 27.5 °C treatments. Although this was not statistcally significant.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Summary table for temperature</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="statistical-analysis-of-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analysis-of-the-data">Statistical analysis of the data</h3>
+<p>A linear modeling approach was used to examine differences in the mean size of each ploidy group held under different temperature treatments. <br></p>
+<section id="mass" class="level4">
+<h4 class="anchored" data-anchor-id="mass">Mass</h4>
+<p>We first examined the distribution of the data to determine if it met the assumptions of normality. As the data did not fit the assumptions of normality (<a href="#fig-hist_temp_mass" class="quarto-xref">Figure&nbsp;3</a>) it was log transformed which improved normality (<a href="#fig-hist_temp_mass_logged" class="quarto-xref">Figure&nbsp;4</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-hist_temp_mass" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist_temp_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-hist_temp_mass-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist_temp_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Distribution of size data
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-hist_temp_mass_logged" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist_temp_mass_logged-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-hist_temp_mass_logged-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist_temp_mass_logged-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Distribution of log transformed size data
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As all individuals had been growing in a common environment prior to the start of the experiment we compared the size of individuals at the start of the experiment using a linear model. <br> This model indicated that there was a significant difference in the mass of induced triploids in the 22.5 and 7.5 °C treatments. This means that we couldn’t just compare the size of individuals at the end of the experiment. <br> Differences in mean size of each ploidy existed at the start of the experiment. Diploids were the smallest and mated triploids were largest (<a href="#fig-hist_temp_mass_logged" class="quarto-xref">Figure&nbsp;4</a>).This is what explains the signifcant treatment:ploidy interaction.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>massgrowthlm_temp <span class="ot">&lt;-</span> sizedat_temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Time <span class="sc">==</span> <span class="st">"1_start"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lm</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">data=</span>.)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>mass_start_temp.aov <span class="ot">&lt;-</span> <span class="fu">aov</span>(massgrowthlm_temp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlm_temp), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-mass_at_start_temp" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mass_at_start_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Results of the linear model comparing the size of individuals at the start of the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-mass_at_start_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Df</th>
+<th style="text-align: right;">Sum Sq</th>
+<th style="text-align: right;">Mean Sq</th>
+<th style="text-align: right;">F value</th>
+<th style="text-align: right;">Pr(&gt;F)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Ploidy</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">58.946</td>
+<td style="text-align: right;">29.473</td>
+<td style="text-align: right;">195.952</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2.323</td>
+<td style="text-align: right;">0.581</td>
+<td style="text-align: right;">3.862</td>
+<td style="text-align: right;">0.004</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Ploidy:Treatment</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.249</td>
+<td style="text-align: right;">0.281</td>
+<td style="text-align: right;">1.869</td>
+<td style="text-align: right;">0.061</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Residuals</td>
+<td style="text-align: right;">1325</td>
+<td style="text-align: right;">199.294</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>We focused on changes in mass rather than shell height because of the potential mis-measureing and chipping that resulted in some shrinkage in the shell height over the course of the experiment. Using a linear mixed model that included tank as a random factor we compared the mean size of individuals from each ploidy group individual for each of the treatments at the start and the end of the experiment.<br><br> First we compared diploids</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_temp_dips <span class="ot">&lt;-</span> sizedat_temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"2M"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_temp_dips), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_dips_temp" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_dips_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: ANOVA table results of the linear model comparing the size of diploids throughout the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_dips_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">831</td>
+<td style="text-align: right;">32.285</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">831</td>
+<td style="text-align: right;">29.469</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">831</td>
+<td style="text-align: right;">0.816</td>
+<td style="text-align: right;">0.515</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">831</td>
+<td style="text-align: right;">1.766</td>
+<td style="text-align: right;">0.134</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>No significant interaction effects were observed and no main effects of treatment were observed. There was a significant main effect of time (<a href="#tbl-lme_mass_dips_temp" class="quarto-xref">Table&nbsp;2</a>). The mean mass was larger at the conclusion of the experiment than at the start (<a href="#fig-temp_mass" class="quarto-xref">Figure&nbsp;2</a>) <br><br> Followed by induced triploids</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_temp_3C <span class="ot">&lt;-</span> sizedat_temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"3C"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Again there was a significant time main effect but nosignificant treatment or interaction effects (lme_mass_dips_temp_3C)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_temp_3C), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_dips_temp_3C" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_dips_temp_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: ANOVA table results of the linear model comparing the size of induced triploids throughout the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_dips_temp_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">840</td>
+<td style="text-align: right;">35.613</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">840</td>
+<td style="text-align: right;">15.120</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2.661</td>
+<td style="text-align: right;">0.095</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">840</td>
+<td style="text-align: right;">0.931</td>
+<td style="text-align: right;">0.445</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br><br> Finally mated triploids</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_temp_3M <span class="ot">&lt;-</span> sizedat_temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"3M"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Again there was a significant time main effect but no significant treatment or interaction effects (lme_mass_dips_temp_3M).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_temp_3M), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_dips_temp_3M" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_dips_temp_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: ANOVA table results of the linear model comparing the size of mated triploids throughout the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_dips_temp_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">862</td>
+<td style="text-align: right;">311.875</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">862</td>
+<td style="text-align: right;">17.325</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1.683</td>
+<td style="text-align: right;">0.230</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">862</td>
+<td style="text-align: right;">1.142</td>
+<td style="text-align: right;">0.335</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br> <strong>INDIVIDUALS WEIGHED MORE AT THE CONCLUSION OF THE TEMPERATURE EXPERIMENT, BUT NO DIFFERENCES IN SIZE WERE OBSERVED BETWEEN TREATMENTS AT THE END OF THE EXPERIMENT.</strong></p>
+</section>
+</section>
+</section>
+<section id="disolved-oxygen-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="disolved-oxygen-experiment">Disolved oxygen experiment</h2>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sizedat_DO <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO_SIZE_DATA.csv"</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sizedat_DO <span class="ot">&lt;-</span> sizedat_DO <span class="sc">%&gt;%</span> </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">"Treatment"</span>,<span class="st">"Tank"</span>, <span class="st">"Ploidy"</span>, <span class="st">"Time"</span>), as.factor)) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">"Mass"</span>, <span class="st">"Shell.Height"</span>), as.numeric))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visualise-the-data." class="level3">
+<h3 class="anchored" data-anchor-id="visualise-the-data.">Visualise the data.</h3>
+<p>fig-do_mass and fig-do_height show the size of individuals at the start and conclusion of the experiment.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-do_mass" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-do_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-do_mass-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-do_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Mass of individuals at the start and end of the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-do_height" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-do_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-do_height-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-do_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Shell height of individuals at the start and end of the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="startistical-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="startistical-analysis">Startistical analysis</h3>
+<p>Again we copm[ared the mean size of each ploidy seperatley at the start and end of each experiment. We did not conmpare across ploidies as there are inherent differences in the size of each ploidy. Mated triploids were larger than induced triploids and diploids at the start of this experiment. There was no difference in the size of diploids and mated triploids throughout this experiment. <br> We focused on mass as it provided a more accurate measurement and was not as influenced by small chips of shell being removed. <br> We first visualised the distribution of the data (<strong>?@fig-do_height_distributrion</strong>). A log transformation of the data improved normality (<strong>?@fig-do_mass_distributrion_log</strong>), thus we performed statistical analyses on log transformed data.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-do_mass_distributrion" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-do_mass_distributrion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-do_mass_distributrion-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-do_mass_distributrion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Mass distribution in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-do_height_distributrion_log" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-do_height_distributrion_log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-do_height_distributrion_log-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-do_height_distributrion_log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Log transformed mass distribution in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><br> Again using a linear mixed model that included tank as a random factor we compared sizes for each ploidy seperatley over the course of this experiment. <br><br> Started with diploids <br></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_DO_2M <span class="ot">&lt;-</span> sizedat_DO <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"2M"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Treatment <span class="sc">!=</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>No significant main or interaction effects were observed in diploids (<a href="#tbl-lme_mass_DO_2M" class="quarto-xref">Table&nbsp;5</a>). No growth was observed and no differences in mass between treatments existedf at any point during this experiment.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_DO_2M), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_DO_2M" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_DO_2M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: ANOVA table results of the linear model comparing the size of diploids throughout the DO experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_DO_2M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">619</td>
+<td style="text-align: right;">258.502</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">619</td>
+<td style="text-align: right;">0.366</td>
+<td style="text-align: right;">0.546</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">619</td>
+<td style="text-align: right;">0.848</td>
+<td style="text-align: right;">0.468</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">619</td>
+<td style="text-align: right;">0.760</td>
+<td style="text-align: right;">0.517</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br><br> Induced triploids showed the same pattern. No differences in size were observed during this experiment (<a href="#tbl-lme_mass_DO_3C" class="quarto-xref">Table&nbsp;6</a>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_DO_3C <span class="ot">&lt;-</span> sizedat_DO <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"3C"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Treatment <span class="sc">!=</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_DO_3C), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_DO_3C" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_DO_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: ANOVA table results of the linear model comparing the size of induced triploids throughout the DO experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_DO_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">172.682</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">2.099</td>
+<td style="text-align: right;">0.148</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">1.473</td>
+<td style="text-align: right;">0.221</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">675</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.996</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br><br> Tiploids however showed significant differences in mass between the start and the end of the experiment. Triploids grew over the course of the experiment. This was shown by the significant main effect of time (). No main effect of treatment or time*treatment interaction effects were observed ().</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_DO_3M <span class="ot">&lt;-</span> sizedat_DO <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"3M"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Treatment <span class="sc">!=</span> <span class="dv">100</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_DO_3M), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_DO_3M" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_DO_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: ANOVA table results of the linear model comparing the size of mated triploids throughout the DO experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_DO_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">742</td>
+<td style="text-align: right;">589.876</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">742</td>
+<td style="text-align: right;">17.168</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">742</td>
+<td style="text-align: right;">0.335</td>
+<td style="text-align: right;">0.800</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time:Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">742</td>
+<td style="text-align: right;">1.538</td>
+<td style="text-align: right;">0.203</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>THERE WAS NO CHANGE IN MASS OVER THE COURSE OF THIS EXPERIMENT IN DIPLOIDS OR INDUCED TRIPLOIDS, HOWEVER MATED TRIPLOIDS DID SHOW A DIFFERENCE IN SIZE OVER TEH COURSE OF THIS EXPERIMENT. THERE WAS NO EFFECT OF DISOCLVED OXYGEN LEVEL. </strong></p>
+</section>
+</section>
+<section id="pco2-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="pco2-experiment">pCO2 experiment</h2>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pHsizedat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_sizedata.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Treatment"</span>, <span class="st">"Ploidy"</span>, <span class="st">"Time.point"</span>), as.factor) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Ploidy <span class="sc">!=</span> <span class="st">"Blank"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visualise-the-data.-1" class="level3">
+<h3 class="anchored" data-anchor-id="visualise-the-data.-1">Visualise the data.</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-pH_mass" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pH_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-pH_mass-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pH_mass-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Mass of individuals at the start and end of the pCO2 oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-pH_height" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pH_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-pH_height-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pH_height-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Shell height of individuals at the start and end of the pCO2 oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="statistical-analyses" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analyses">Statistical analyses</h3>
+<p>We will be focusing on the mass in these analyses to stay consistent with previous sections. <br> After examining the distribution of the data (<a href="#fig-ph_mass_distributrion" class="quarto-xref">Figure&nbsp;11</a>) and was thus log transformed which improved normality (fig-ph_mass_distributrion_log).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ph_mass_distributrion" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ph_mass_distributrion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-ph_mass_distributrion-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ph_mass_distributrion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Mass distribution in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ph_mass_distributrion_log" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ph_mass_distributrion_log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-ph_mass_distributrion_log-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ph_mass_distributrion_log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Mass distribution in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As in the previous analyses I am going to compare the two time points for each of the ploidies using a linear mixed modelling approach. Tank is included as a random factor.<br> <br> Starting with diploids. <br> No differences in mass were observed in size in diploids duering the pH experiment. No interaction effects or main effects of time or treatment were observed (<span class="citation" data-cites="lme_mass_ph_2M">@lme_mass_ph_2M</span>)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_pH_2M <span class="ot">&lt;-</span> pHsizedat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"Diploid"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time.point<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_pH_2M), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_ph_2M" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_ph_2M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8: ANOVA table results of the linear model comparing the size of diploids throughout the pCO2 experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_ph_2M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">378</td>
+<td style="text-align: right;">3112.006</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">378</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.999</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.166</td>
+<td style="text-align: right;">0.951</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">378</td>
+<td style="text-align: right;">0.252</td>
+<td style="text-align: right;">0.908</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br> Induced Triploids <br> <br> Similarly induced triploids did not show any impact of time or treatment on the mean size of individuals (<a href="#tbl-lme_mass_ph_3C" class="quarto-xref">Table&nbsp;9</a>)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_pH_3C <span class="ot">&lt;-</span> pHsizedat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"Induced Triploid"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time.point<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_pH_3C), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_ph_3C" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_ph_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9: ANOVA table results of the linear model comparing the size of induced triploids throughout the pCO2 experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_ph_3C-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">367</td>
+<td style="text-align: right;">5436.204</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">367</td>
+<td style="text-align: right;">1.144</td>
+<td style="text-align: right;">0.285</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.711</td>
+<td style="text-align: right;">0.603</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">367</td>
+<td style="text-align: right;">0.301</td>
+<td style="text-align: right;">0.877</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><br> Mated Triploids <br> <br> Similarly mated triploids did not show any impact of time or treatment on the mean size of individuals (<a href="#tbl-lme_mass_ph_3M" class="quarto-xref">Table&nbsp;10</a>)</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>massgrowthlme_pH_3M <span class="ot">&lt;-</span> pHsizedat <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">==</span> <span class="st">"Mated Triploid"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">log</span>(Mass)<span class="sc">~</span>Time.point<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span><span class="dv">1</span> <span class="sc">|</span> Tank, <span class="at">data=</span>.) <span class="co">#This model includes a random effect of tank. </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">anova</span>(massgrowthlme_pH_3M), <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-lme_mass_ph_3M" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_mass_ph_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10: ANOVA table results of the linear model comparing the size of mated triploids throughout the pCO2 experiment
+</figcaption>
+<div aria-describedby="tbl-lme_mass_ph_3M-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">326</td>
+<td style="text-align: right;">9115.745</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">326</td>
+<td style="text-align: right;">1.086</td>
+<td style="text-align: right;">0.298</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2.220</td>
+<td style="text-align: right;">0.140</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Time.point:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">326</td>
+<td style="text-align: right;">0.656</td>
+<td style="text-align: right;">0.623</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong><em>NO DIFFERENCES IN THE MEAN SIZE OF INDIVIDUALS EXISTED IN THE PH EXPERIMENT. NO GROWTH OCCURED IN ANY OF THE TREATMENTS.</em></strong></p>
+</section>
+</section>
+</section>
+<section id="oxygen-consumption" class="level1">
+<h1>Oxygen consumption</h1>
+<p>Although <a href="https://doi.org/10.3389/fmars.2020.00399">Ding et al 2020</a> and <a href="https://www.frontiersin.org/articles/10.3389/fmars.2023.1194296/full">Bodenstein</a> used ANOVAs to compare oxygen consumption I will use linear mixed models to compare oxygen consumption rates. Tank will be inlcuded as a random factor to account for potential variation between tanks. Seperate analyses will be run to compare how each ploidy responded to heat shock stress.</p>
+<section id="temperature" class="level2">
+<h2 class="anchored" data-anchor-id="temperature">Temperature</h2>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>temp_resprates <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Temperature"</span>, <span class="st">"temp_masscorrectedrates.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Ploidy, Treatment, Tank, mass_corected_rate)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>temp_resprates<span class="sc">$</span>mass_corected_rate <span class="ot">&lt;-</span> temp_resprates<span class="sc">$</span>mass_corected_rate <span class="sc">*-</span><span class="dv">1</span><span class="co">#make the rates column positive</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Replace the negatives with zero</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>temp_resprates <span class="ot">&lt;-</span> temp_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">mass_corected_rate =</span> <span class="fu">pmax</span>(mass_corected_rate, <span class="dv">0</span>))</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>temp_resprates <span class="ot">&lt;-</span> temp_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">!=</span> <span class="st">""</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Add a HS vs no HS column</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>temp_resprates<span class="sc">$</span>HS <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"HS"</span>, temp_resprates<span class="sc">$</span>Treatment), <span class="st">"HS"</span>, <span class="st">"NOHS"</span>)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>temp_resprates <span class="ot">&lt;-</span> temp_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">"Treatment"</span>, <span class="st">"Tank"</span>, <span class="st">"Ploidy"</span>, <span class="st">"HS"</span>), as.factor)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>temp_resprates<span class="sc">$</span>Treatment <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"HS"</span>, <span class="st">""</span>, temp_resprates<span class="sc">$</span>Treatment)<span class="co">#removes the "HS" letters from </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visulaise-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="visulaise-the-data">Visulaise the data</h3>
+<p><a href="#fig-temp_resp" class="quarto-xref">Figure&nbsp;13</a></p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_resp" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_resp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Oxygen consumption at each temperature
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="perform-statistical-analyses" class="level3">
+<h3 class="anchored" data-anchor-id="perform-statistical-analyses">Perform statistical analyses</h3>
+<section id="non-heat-shocked-individuals." class="level4">
+<h4 class="anchored" data-anchor-id="non-heat-shocked-individuals.">Non-heat shocked individuals.</h4>
+<p>We examined the data and it was left skewed and included many zeros(<a href="#fig-temp_resp_hist" class="quarto-xref">Figure&nbsp;14</a>). We added 0.001 to the data to remove the zeros and square root transofrmed the data which improved normality (<a href="#fig-temp_resp_hist_transformed" class="quarto-xref">Figure&nbsp;15</a>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_resp_hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_resp_hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_resp_hist-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_resp_hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Distribution of oxygen consumption rates
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_resp_hist_transformed" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_resp_hist_transformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_resp_hist_transformed-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_resp_hist_transformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: Square root transformed distribution of oxygen consumption rates
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The results of the linear mixed model indicated that there was a marginally significant interaction effect and significant main effects of ploidy and treatment (<a href="#tbl-lme_temp_resorates_noHS" class="quarto-xref">Table&nbsp;11</a>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lm_temp_resp_noHS <span class="ot">&lt;-</span> temp_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"NOHS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-lme_temp_resorates_noHS" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_temp_resorates_noHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11: ANOVA table results of linear mixed model investigating ploidy x treatment interactions on oxygen consumption
+</figcaption>
+<div aria-describedby="tbl-lme_temp_resorates_noHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">383.148</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">3.942</td>
+<td style="text-align: right;">0.022</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">8.865</td>
+<td style="text-align: right;">0.003</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy:Treatment</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">1.985</td>
+<td style="text-align: right;">0.055</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>We then performed post hoc analyses on this to determine significant parirwise contrasts. These comparisons were made using the emmeans package.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>emmeans_lm_temp_resp <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_temp_resp_noHS, <span class="sc">~</span> Ploidy<span class="sc">*</span>Treatment)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>temp_resp_contrasts_noHS <span class="ot">&lt;-</span> <span class="fu">pairs</span>(emmeans_lm_temp_resp)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>temp_resp_contrasts_noHS_df <span class="ot">&lt;-</span>  <span class="fu">as.data.frame</span>(temp_resp_contrasts_noHS)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>sig_temp_resp_contrasts_noHS_df <span class="ot">&lt;-</span> temp_resp_contrasts_noHS_df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(p.value <span class="sc">&lt;=</span><span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Withing ploidies diploids held in the two lowest temperatures (7.5, 12.5 °C) exhibited significantly lower oxygen consumption than those held in the two highest temperatures (22.5, 27.5 °C) (<a href="#tbl-pairwise_temp_resp_nohs" class="quarto-xref">Table&nbsp;12</a>). No within ploidy diffences in oxygen consumption were observed for other ploidies. No signifcant differences in oxygen consumption existed between ploidies within the same temperature treatment.</p>
+<div class="cell">
+<div id="tbl-pairwise_temp_resp_nohs" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pairwise_temp_resp_nohs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;12: Signifcant pairwise contrasts from the linear model examinig oxygen consumption of individuals held at different temperatures
+</figcaption>
+<div aria-describedby="tbl-pairwise_temp_resp_nohs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<colgroup>
+<col style="width: 45%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 3%">
+<col style="width: 12%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">contrast</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">SE</th>
+<th style="text-align: right;">df</th>
+<th style="text-align: right;">t.ratio</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2m Treatment12.5 - 2m Treatment22.5</td>
+<td style="text-align: right;">-1.158252</td>
+<td style="text-align: right;">0.2388649</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">-4.848983</td>
+<td style="text-align: right;">0.0244483</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2m Treatment22.5 - 2m Treatment7.5</td>
+<td style="text-align: right;">1.071035</td>
+<td style="text-align: right;">0.2390367</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4.480629</td>
+<td style="text-align: right;">0.0403190</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>We then used the same appropach of a linear mixed model to investigate how heat shocked individuals. The model showed no significant interaction effects or main effects of ploidy or treatment.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>lm_temp_resp_HS <span class="ot">&lt;-</span> temp_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"HS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-ANOVA_HS_LM" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ANOVA_HS_LM-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13: ANOVA results of the linear model examining differences in oxygen consumption in heat shocked individuals
+</figcaption>
+<div aria-describedby="tbl-ANOVA_HS_LM-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">150.574</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">0.982</td>
+<td style="text-align: right;">0.381</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2.853</td>
+<td style="text-align: right;">0.135</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">0.586</td>
+<td style="text-align: right;">0.674</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Finally we compared the respiration rates in the heat shocked individuals and the non heat shocked individuals THIS NEEDS TO BE COMPLETED</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># lm_temp_resp &lt;- temp_resprates %&gt;% filter(mass_corected_rate != "NA") %&gt;% filter(Ploidy == "3m") %&gt;% </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   lme(sqrt(mass_corected_rate+.001)~HS*Treatment, random = ~ 1|Tank, data=., method = "ML")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong><em>NO DIFFERENCES IN OXYGEN CONSUMPTION EXISTED BETWEEN PLOIDIES AT ANY TEMPERATURE. DIPLOIDS INCREASED OXYGEN CONSUMPTION AT HIGHER TEMPERATURES. TRIPLOIDS DID NOT.THERE WAS NO DIFFERENTIAL IMPACT OF HEAT SHOCK ON INDIVIDUALS. </em></strong></p>
+</section>
+</section>
+</section>
+<section id="disolved-oxygen-experiment-1" class="level2">
+<h2 class="anchored" data-anchor-id="disolved-oxygen-experiment-1">Disolved oxygen experiment</h2>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>DO_resprates <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO_resprates.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Ploidy, Treatment, Tank, mass_corected_rate)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>DO_resprates<span class="sc">$</span>mass_corected_rate <span class="ot">&lt;-</span> DO_resprates<span class="sc">$</span>mass_corected_rate <span class="sc">*-</span><span class="dv">1</span><span class="co">#make the rates column positive</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Replace the negatives with zero</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>DO_resprates <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">mass_corected_rate =</span> <span class="fu">pmax</span>(mass_corected_rate, <span class="dv">0</span>))</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>DO_resprates <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Ploidy <span class="sc">!=</span> <span class="st">""</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co">#Add a HS vs no HS column</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>DO_resprates<span class="sc">$</span>HS <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"HS"</span>, DO_resprates<span class="sc">$</span>Treatment), <span class="st">"HS"</span>, <span class="st">"NOHS"</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>DO_resprates <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">"Treatment"</span>, <span class="st">"Tank"</span>, <span class="st">"Ploidy"</span>, <span class="st">"HS"</span>), as.factor)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>DO_resprates<span class="sc">$</span>Treatment <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"HS"</span>, <span class="st">""</span>, DO_resprates<span class="sc">$</span>Treatment)<span class="co">#removes the "HS" letters from </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="visulaise-the-data-1" class="level3">
+<h3 class="anchored" data-anchor-id="visulaise-the-data-1">Visulaise the data</h3>
+<p><a href="#fig-temp_resp" class="quarto-xref">Figure&nbsp;13</a></p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-DO_resp" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-DO_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-DO_resp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-DO_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: Oxygen consumption at each DO level
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="statistical-analyses-1" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analyses-1">Statistical analyses</h3>
+<p>We visulay inspected the data and as it was not normaly distributed (<a href="#fig-DO_hist" class="quarto-xref">Figure&nbsp;17</a>), we square root transformed the data which improved normality (<a href="#fig-DO_hist_sqrt" class="quarto-xref">Figure&nbsp;18</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-DO_hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-DO_hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-DO_hist-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-DO_hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: histogram of the distribution of oxygen consumption rates in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-DO_hist_sqrt" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-DO_hist_sqrt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-DO_hist_sqrt-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-DO_hist_sqrt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18: histogram of the distribution of oxygen consumption rates in the disolved oxygen experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>lm_DO_resp_noHS <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"NOHS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We then constructed a linear mixed model to examine differences between ploidies and treatments. We observed a significant main effect of ploidy (<a href="#tbl-lme_DO_resorates_noHS" class="quarto-xref">Table&nbsp;14</a>) but no main effects of treatment and no ploidy treatment x ploidy interaction effect.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>lm_DO_resp_noHS <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"NOHS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Treatment <span class="sc">!=</span> <span class="st">"100"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-lme_DO_resorates_noHS" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lme_DO_resorates_noHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14: ANOVA table results of linear mixed model investigating ploidy x treatment interactions on oxygen consumption at different disolved oxygen levels
+</figcaption>
+<div aria-describedby="tbl-lme_DO_resorates_noHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">818.941</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">6.492</td>
+<td style="text-align: right;">0.002</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">2.428</td>
+<td style="text-align: right;">0.141</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy:Treatment</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">0.195</td>
+<td style="text-align: right;">0.977</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Post hoc tests using the emmeans package indicated that diploids used significantly more oxygen at all DO treatment levels than both triploids. There was no difference between the two triploid production types (<a href="#tbl-pairwise_DO_resp_nohs" class="quarto-xref">Table&nbsp;15</a>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>emmeans_lm_DO_resp <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm_DO_resp_noHS, <span class="sc">~</span> Ploidy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>NOTE: Results may be misleading due to involvement in interactions</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>DO_resp_contrasts_noHS <span class="ot">&lt;-</span> <span class="fu">pairs</span>(emmeans_lm_DO_resp)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>DO_resp_contrasts_noHS_df <span class="ot">&lt;-</span>  <span class="fu">as.data.frame</span>(DO_resp_contrasts_noHS)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#sig_DO_resp_contrasts_noHS_df &lt;- temp_resp_contrasts_noHS_df %&gt;% filter(p.value &lt;=0.05)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-pairwise_DO_resp_nohs" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pairwise_DO_resp_nohs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15: Signifcant pairwise contrasts from the linear model examinig oxygen consumption of individuals held at different disolved oxygen levels
+</figcaption>
+<div aria-describedby="tbl-pairwise_DO_resp_nohs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">contrast</th>
+<th style="text-align: right;">estimate</th>
+<th style="text-align: right;">SE</th>
+<th style="text-align: right;">df</th>
+<th style="text-align: right;">t.ratio</th>
+<th style="text-align: right;">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2M - 3C</td>
+<td style="text-align: right;">0.2316952</td>
+<td style="text-align: right;">0.0927631</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">2.4977080</td>
+<td style="text-align: right;">0.0383926</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2M - 3M</td>
+<td style="text-align: right;">0.3116467</td>
+<td style="text-align: right;">0.0953659</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">3.2679055</td>
+<td style="text-align: right;">0.0045472</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3C - 3M</td>
+<td style="text-align: right;">0.0799514</td>
+<td style="text-align: right;">0.0924716</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">0.8646048</td>
+<td style="text-align: right;">0.6640943</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The linear mixed model investigating differences in the heat shock treatments indicated that there were no statistcially significant differences in mean</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>lm_DO_resp_HS <span class="ot">&lt;-</span> DO_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"HS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Treatment <span class="sc">!=</span> <span class="st">"100"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Ploidy<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-lm_DO_resp_HS" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lm_DO_resp_HS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16: ANOVA table of results from heat shocked individuals.
+</figcaption>
+<div aria-describedby="tbl-lm_DO_resp_HS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">454.2043714</td>
+<td style="text-align: right;">0.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.0982055</td>
+<td style="text-align: right;">0.9066056</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.4373142</td>
+<td style="text-align: right;">0.6648230</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ploidy:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.2135590</td>
+<td style="text-align: right;">0.9299357</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong><em>DIPLOIDS CONSUMED MORE OXYGEN THAN TRIPLOIDS UNDER ALL DO CONDITIONS AT NORMAL TEMPERATURES. AT HIGHT TEMPERATURES ALL GROUPS CONSUMED MORE OXYGEN, BUT THERE WAS NO DIFFERENCE BETWEEN PLOIDIES OR TREATMENTS</em></strong></p>
+</section>
+<section id="pco2-experiment-1" class="level3">
+<h3 class="anchored" data-anchor-id="pco2-experiment-1">pCO2 experiment</h3>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>pH_resprates <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_resprates.csv"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Colour, Treatment, Tank, mass_corected_rate)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Replace the negatives with zero</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>pH_resprates <span class="ot">&lt;-</span> pH_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">mass_corected_rate =</span> <span class="fu">pmax</span>(mass_corected_rate, <span class="dv">0</span>))</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="co">#pH_resprates &lt;- pH_resprates %&gt;% filter(Ploidy != "")</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Add a HS vs no HS column</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>pH_resprates<span class="sc">$</span>HS <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">grepl</span>(<span class="st">"HS"</span>, pH_resprates<span class="sc">$</span>Treatment), <span class="st">"HS"</span>, <span class="st">"NOHS"</span>)</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>pH_resprates<span class="sc">$</span>Treatment <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"HS"</span>, <span class="st">""</span>, pH_resprates<span class="sc">$</span>Treatment)<span class="co">#removes the "HS" letters from </span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>pH_resprates<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"HS"</span>, <span class="st">""</span>, pH_resprates<span class="sc">$</span>Tank)<span class="co">#removes the "HS" letters from </span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>pH_resprates <span class="ot">&lt;-</span> pH_resprates <span class="sc">%&gt;%</span> <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">"Treatment"</span>, <span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"HS"</span>), as.factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="visualise-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="visualise-the-data">Visualise the data</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-pH_resp" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pH_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-pH_resp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pH_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19: Oxygen consumption at each DO level
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="statistical-analyses-2" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analyses-2">Statistical analyses</h3>
+<p>We inspected the data and as it did not meet the assumptions of normality (<a href="#fig-hist_pH_resp" class="quarto-xref">Figure&nbsp;20</a>), it was square root transformed which improved normailty (<a href="#fig-hist_pH_resp_transformed" class="quarto-xref">Figure&nbsp;21</a>)</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-hist_pH_resp" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist_pH_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-hist_pH_resp-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist_pH_resp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20: Histogram of distribution of respiration data in pCO2 experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-hist_pH_resp_transformed" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist_pH_resp_transformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-hist_pH_resp_transformed-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist_pH_resp_transformed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: Histogram of distribution of respiration data in pCO2 experiment
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We then used a linear mixed model to examine differences in the oxygen consumption across ploidies and treatments. No main effects or interactions were observed in either the heat shocked individuals (<a href="#tbl-lm_pH_resp_HS" class="quarto-xref">Table&nbsp;17</a>) or those that did not receive the heat shock().</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>lm_pH_resp_NOHS <span class="ot">&lt;-</span> pH_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"NOHS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Colour <span class="sc">!=</span> <span class="st">"NO"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Colour<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>lm_pH_resp_HS <span class="ot">&lt;-</span> pH_resprates <span class="sc">%&gt;%</span> <span class="fu">filter</span>(HS <span class="sc">==</span> <span class="st">"HS"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(mass_corected_rate <span class="sc">!=</span> <span class="st">"NA"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Colour <span class="sc">!=</span> <span class="st">"NO"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lme</span>(<span class="fu">sqrt</span>(mass_corected_rate<span class="fl">+.001</span>)<span class="sc">~</span>Colour<span class="sc">*</span>Treatment, <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span><span class="sc">|</span>Tank, <span class="at">data=</span>., <span class="at">method =</span> <span class="st">"ML"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-lm_pH_resp_HS" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lm_pH_resp_HS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17: ANOVA table of results from heat shocked individuals in pH experiment.
+</figcaption>
+<div aria-describedby="tbl-lm_pH_resp_HS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">225.340786</td>
+<td style="text-align: right;">0.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">2.043070</td>
+<td style="text-align: right;">0.1363398</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">3.030930</td>
+<td style="text-align: right;">0.1230866</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour:Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">1.597638</td>
+<td style="text-align: right;">0.1830314</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-lm_pH_resp_NOHS" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lm_pH_resp_NOHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;18: ANOVA table of results from individuals in pH experiment.
+</figcaption>
+<div aria-describedby="tbl-lm_pH_resp_NOHS-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">numDF</th>
+<th style="text-align: right;">denDF</th>
+<th style="text-align: right;">F-value</th>
+<th style="text-align: right;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">414.2461405</td>
+<td style="text-align: right;">0.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">0.0406737</td>
+<td style="text-align: right;">0.9601534</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1.0027519</td>
+<td style="text-align: right;">0.4503037</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour:Treatment</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">144</td>
+<td style="text-align: right;">1.1203988</td>
+<td style="text-align: right;">0.3529926</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="mortalitysurvival" class="level1">
+<h1>Mortality/Survival</h1>
+<section id="temperature-1" class="level2">
+<h2 class="anchored" data-anchor-id="temperature-1">Temperature</h2>
+<p>Mortality was low across all temperature treatments (<a href="#fig-temp_survival" class="quarto-xref">Figure&nbsp;22</a>) with only 18 = moralities observed of a total of 1350 individuals (1.3% mortality; <a href="#tbl-mortalties_temp" class="quarto-xref">Table&nbsp;19</a>). There was no pattern of mortality across diploids or treatment. Due to the lack of mortality observed, we did not perform statistical analyses on temperature mortality data.</p>
+<p>Read in the mortality data and prepare it for analysis</p>
+<p>Visualise the data</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_survival" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_survival-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-temp_survival-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_survival-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: Kaplan Meyer survival plot showing survival across temperature treatments for each ploidy group
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_temp" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;19: Number of mortalities of each temperature and ploidy in the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-mortalties_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: left;">Temp</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="disolved-oxygen" class="level2">
+<h2 class="anchored" data-anchor-id="disolved-oxygen">Disolved oxygen</h2>
+<p>Mortality was also low in the disolved oxygen experiment. 18 Mortalities were observed across all treatments and ploidies. This accounts for 1.3% mortality. Although the majority of moralities occured in the 20% oxygen level treatment (<a href="#tbl-mortalties_Do" class="quarto-xref">Table&nbsp;20</a>; <a href="#fig-mortalties_Do" class="quarto-xref">Figure&nbsp;23</a>)</p>
+<p>Read in the mortality data, and format it so that I can run survival analyses.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>DO_survivors <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO__survivors.csv"</span>))</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>DO_survivors<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DO_survivors<span class="sc">$</span>Tank)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>DO_tank_assignments <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO_tank_assignments.csv"</span>))</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Uncount each of the rows in the first survivor colum</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO <span class="ot">&lt;-</span> DO_survivors <span class="sc">%&gt;%</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">uncount</span>(<span class="at">weights =</span> Surv_1)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(individ_mortdat_DO))<span class="co">#Add an ID column so each individual has a unique ID</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO<span class="sc">$</span>status_Surv_0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a df to store all survival event data for analyes</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> individ_mortdat_DO</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="co">#create a for loop that gives all survivors a status across all</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">34</span>) {</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the current column name</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>  current_column_name <span class="ot">&lt;-</span> <span class="fu">colnames</span>(DO_survivors)[i]</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove "Survivors_" from the current column name</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>  stripped_column_name <span class="ot">&lt;-</span> current_column_name</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a new column name based on the stripped current column name</span></span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"status_"</span>, stripped_column_name)</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Uncount the specified column</span></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> DO_survivors[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, i)] <span class="sc">%&gt;%</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">weights =</span> <span class="fu">as.numeric</span>(<span class="fu">get</span>(current_column_name))) <span class="sc">%&gt;%</span></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">uncount</span>(weights)</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add an ID column from 1 to 15</span></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> survivors_column <span class="sc">%&gt;%</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a status column to indicate that these individuals are alive</span></span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>  survivors_column[[new_column_name]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the data frames</span></span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>  survival_eventdat_DO <span class="ot">&lt;-</span> <span class="fu">left_join</span>(survival_eventdat_DO, survivors_column, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"ID"</span>))</span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a><span class="co">#Select the columns that status at the begining</span></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"Surv"</span>))</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a><span class="co">#Now need to pivot longer for survival plots</span></span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">names_to =</span> <span class="st">"Time"</span>, <span class="at">values_to =</span> <span class="st">"Status"</span>)</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove the status from the time column</span></span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Surv_"</span>, <span class="st">""</span>, Time))</span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a><span class="co">#Add 1 where there is a NA</span></span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>Status[<span class="fu">is.na</span>(survival_eventdat_DO<span class="sc">$</span>Status)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a><span class="co">#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).</span></span>
+<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span></span>
+<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Tank, Colour, ID) <span class="sc">%&gt;%</span></span>
+<span id="cb41-55"><a href="#cb41-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> <span class="fu">which.max</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|</span> <span class="fu">sum</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb41-56"><a href="#cb41-56" aria-hidden="true" tabindex="-1"></a><span class="co">#Make sure that the sum of mortality events actually matches the number of mortalities. In the DOerature experiment this was 20</span></span>
+<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>event <span class="ot">&lt;-</span> survival_eventdat_DO<span class="sc">$</span>Status</span>
+<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_DO<span class="sc">$</span>Time)</span>
+<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(survival_eventdat_DO<span class="sc">$</span>Status)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 73</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Merge the file with the list of treatment tanks</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> <span class="fu">merge</span>(survival_eventdat_DO, DO_tank_assignments, <span class="at">by =</span> <span class="st">"Tank"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Plot the mortality between tanks faceted by DO level</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-mortalties_Do" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Single-stressor-data-analysis_files/figure-html/fig-mortalties_Do-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23: Kaplan Meyer survival curves across disolved oxygen levels in this study
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_Do" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20: Number of mortalities of each temperature and ploidy in the disolved oxygen experiment
+</figcaption>
+<div aria-describedby="tbl-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: left;">DO</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="pco2" class="level2">
+<h2 class="anchored" data-anchor-id="pco2">pCO2</h2>
+<p>Differences in mortality were observed across ploidies and pH treatments. 250 mortalities were observed over the course of this experiment (). We analysed mortality using the survival package in R.</p>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>pH_mortdat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_mortality.csv"</span>))</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>pH_mortdattemplate <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"Mortality_template.csv"</span>))</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>pH_tanktrt <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_Tank_assignments.csv"</span>))</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>pH_mortdat<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(pH_mortdat<span class="sc">$</span>Tank)</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>pH_mortdattemplate<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(pH_mortdattemplate<span class="sc">$</span>Tank)</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co">#merge the data with the tempalate</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pH_mortdattemplate, pH_mortdat, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Date"</span>, <span class="st">"Colour"</span>))</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Replace the NAs with zeros</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Number_Morts =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(Number_Morts), <span class="dv">0</span>, Number_Morts))</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Now need to pivot wider to get the dates so we can subtract the dates</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span> <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(Tank, Colour),</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>                                                           <span class="at">names_from=</span><span class="st">'Date'</span>,</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>                                                           <span class="at">values_from=</span><span class="st">'Number_Morts'</span>)</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Add a new collumn that has the total number per group at the start of the experiment (Think it was 15)</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded<span class="sc">$</span>Survivors_Nov_2 <span class="ot">&lt;-</span> <span class="dv">15</span><span class="sc">-</span>ph_mortdat_expanded<span class="sc">$</span>Nov_02</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate survivors at each time interval </span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">10</span>) {</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>  survivors <span class="ot">&lt;-</span> ph_mortdat_expanded[, i<span class="sc">+</span><span class="dv">7</span>] <span class="sc">-</span> ph_mortdat_expanded[, i]</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create new column name</span></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Survivors_"</span>, <span class="fu">colnames</span>(ph_mortdat_expanded)[i])</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add new column with survivors</span></span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>  ph_mortdat_expanded[, new_column_name] <span class="ot">&lt;-</span> survivors</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a><span class="co">#now I need to create a df with 15 rows for each of the tanks and ploidys</span></span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span></span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">row_id =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="fu">rep</span>(row_id, <span class="at">each =</span> <span class="dv">15</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a><span class="co">#Now add in an id column where we repeat 1-15 for each tank</span></span>
+<span id="cb44-33"><a href="#cb44-33" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(ph_mortdat_expanded_repeated))</span>
+<span id="cb44-34"><a href="#cb44-34" aria-hidden="true" tabindex="-1"></a><span class="co">#add a status for the start of teh experiment, 0 indicates an indivvidual was alive </span></span>
+<span id="cb44-35"><a href="#cb44-35" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated<span class="sc">$</span>status_Sep_30 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb44-36"><a href="#cb44-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-37"><a href="#cb44-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a df to store all survival event data for analyes####################I FUCKED THIS UP SOMEHOW, GO BACK AND FIX IT#################!!!!!</span></span>
+<span id="cb44-38"><a href="#cb44-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">11</span><span class="sc">:</span><span class="dv">18</span>) {</span>
+<span id="cb44-39"><a href="#cb44-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the current column name</span></span>
+<span id="cb44-40"><a href="#cb44-40" aria-hidden="true" tabindex="-1"></a>  current_column_name <span class="ot">&lt;-</span> <span class="fu">colnames</span>(ph_mortdat_expanded)[i]</span>
+<span id="cb44-41"><a href="#cb44-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-42"><a href="#cb44-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove "Survivors_" from the current column name</span></span>
+<span id="cb44-43"><a href="#cb44-43" aria-hidden="true" tabindex="-1"></a>  stripped_column_name <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"Survivors_"</span>, <span class="st">""</span>, current_column_name)<span class="co">#Here I should remove "surv" from name</span></span>
+<span id="cb44-44"><a href="#cb44-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-45"><a href="#cb44-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a new column name based on the stripped current column name</span></span>
+<span id="cb44-46"><a href="#cb44-46" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"status_"</span>, stripped_column_name)</span>
+<span id="cb44-47"><a href="#cb44-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-48"><a href="#cb44-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Uncount the specified column ###################THIS IS WHERE THINGS GO WRONG HERE###################</span></span>
+<span id="cb44-49"><a href="#cb44-49" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> ph_mortdat_expanded[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, i)] <span class="sc">%&gt;%</span></span>
+<span id="cb44-50"><a href="#cb44-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">weights =</span> <span class="fu">as.numeric</span>(<span class="fu">get</span>(current_column_name))) <span class="sc">%&gt;%</span></span>
+<span id="cb44-51"><a href="#cb44-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">uncount</span>(weights)</span>
+<span id="cb44-52"><a href="#cb44-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-53"><a href="#cb44-53" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add an ID column from 1 to 15</span></span>
+<span id="cb44-54"><a href="#cb44-54" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> survivors_column <span class="sc">%&gt;%</span></span>
+<span id="cb44-55"><a href="#cb44-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb44-56"><a href="#cb44-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb44-57"><a href="#cb44-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb44-58"><a href="#cb44-58" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-59"><a href="#cb44-59" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a status column to indicate that these individuals are alive</span></span>
+<span id="cb44-60"><a href="#cb44-60" aria-hidden="true" tabindex="-1"></a>  survivors_column[[new_column_name]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb44-61"><a href="#cb44-61" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb44-62"><a href="#cb44-62" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the data frames</span></span>
+<span id="cb44-63"><a href="#cb44-63" aria-hidden="true" tabindex="-1"></a>  ph_mortdat_expanded_repeated <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ph_mortdat_expanded_repeated, survivors_column, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"ID"</span>))</span>
+<span id="cb44-64"><a href="#cb44-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb44-65"><a href="#cb44-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-66"><a href="#cb44-66" aria-hidden="true" tabindex="-1"></a><span class="co">#Now select only the coluimns that have the status</span></span>
+<span id="cb44-67"><a href="#cb44-67" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> ph_mortdat_expanded_repeated <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"Surv"</span>))</span>
+<span id="cb44-68"><a href="#cb44-68" aria-hidden="true" tabindex="-1"></a><span class="co">#Pivot longer </span></span>
+<span id="cb44-69"><a href="#cb44-69" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">names_to =</span> <span class="st">"Time"</span>, <span class="at">values_to =</span> <span class="st">"Status"</span>)</span>
+<span id="cb44-70"><a href="#cb44-70" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove the added dates from the time columns</span></span>
+<span id="cb44-71"><a href="#cb44-71" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Nov_"</span>, <span class="st">""</span>, Time))</span>
+<span id="cb44-72"><a href="#cb44-72" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Sep_30"</span>, <span class="st">"0"</span>, Time))</span>
+<span id="cb44-73"><a href="#cb44-73" aria-hidden="true" tabindex="-1"></a><span class="co">#Add 1 where there is a NA</span></span>
+<span id="cb44-74"><a href="#cb44-74" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>Status[<span class="fu">is.na</span>(survival_eventdat_pH<span class="sc">$</span>Status)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb44-75"><a href="#cb44-75" aria-hidden="true" tabindex="-1"></a><span class="co">#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).</span></span>
+<span id="cb44-76"><a href="#cb44-76" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span></span>
+<span id="cb44-77"><a href="#cb44-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Tank, Colour, ID) <span class="sc">%&gt;%</span></span>
+<span id="cb44-78"><a href="#cb44-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> <span class="fu">which.max</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|</span> <span class="fu">sum</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb44-79"><a href="#cb44-79" aria-hidden="true" tabindex="-1"></a><span class="co">#Add an "event column</span></span>
+<span id="cb44-80"><a href="#cb44-80" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>event <span class="ot">&lt;-</span> survival_eventdat_pH<span class="sc">$</span>Status</span>
+<span id="cb44-81"><a href="#cb44-81" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_pH<span class="sc">$</span>Time)</span>
+<span id="cb44-82"><a href="#cb44-82" aria-hidden="true" tabindex="-1"></a><span class="co">#Make sure that the sum of mortality events actually matches the number of mortalities. In the temperature experiment this was 250</span></span>
+<span id="cb44-83"><a href="#cb44-83" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(survival_eventdat_pH<span class="sc">$</span>Status)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 250</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Join the CO2 data so we have a CO2 Level for each of our variables</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> <span class="fu">merge</span>(survival_eventdat_pH,pH_tanktrt, <span class="at">by =</span> <span class="st">"Tank"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_pH" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;21: Number of mortalities of each temperature and ploidy in the pCO2 experiment
+</figcaption>
+<div aria-describedby="tbl-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: right;">CO2_level</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">29</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">24</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

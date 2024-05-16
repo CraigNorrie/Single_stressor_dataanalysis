@@ -12,6 +12,7 @@ This is a notebook for the analysis of growth, mortality, and oxygen consumption
 # Packages
 
 ```{r, results='hide'}
+library(MASS)
 library(tidyverse)
 library(here)
 library(survival)
@@ -297,6 +298,11 @@ temp_resprates <- read.csv(here("Data", "Temperature", "temp_masscorrectedrates.
 temp_resprates$mass_corected_rate <- temp_resprates$mass_corected_rate *-1#make the rates column positive
 #Replace the negatives with zero
 temp_resprates <- temp_resprates %>% mutate(mass_corected_rate = pmax(mass_corected_rate, 0))
+temp_resprates <- temp_resprates %>% filter(Ploidy != "")
+#Add a HS vs no HS column
+temp_resprates$HS <- ifelse(grepl("HS", temp_resprates$Treatment), "HS", "NOHS")
+
+temp_resprates <- temp_resprates %>% mutate_at(c("Treatment", "Tank", "Ploidy", "HS"), as.factor)
 ```
 
 ### Create plots for the data
@@ -304,8 +310,92 @@ temp_resprates <- temp_resprates %>% mutate(mass_corected_rate = pmax(mass_corec
 Summarise the data 
 
 ```{r}
-temprates_summary <- temp_resprates %>% group_by(Treatment, Ploidy) %>% 
-  summarise(temp_mean_resprate= mean(mass_corected_rate, na.rm = TRUE), sem_temp_resprate = sd(mass_corected_rate, na.rm = TRUE)/n())
+temprates_summary <- temp_resprates %>% group_by(Treatment, Ploidy, HS) %>% 
+  summarise(temp_mean_resprate= mean(mass_corected_rate, na.rm = TRUE), sd_temp_resprate = sd(mass_corected_rate, na.rm = TRUE), n=n())
+str(temprates_summary)
+temprates_summary$SEM <- temprates_summary$sd_temp_resprate/(sqrt(temprates_summary$n))
+#temprates_summary$sem_temp_resprate <- temprates_summary %>% unnest(cols = c("sem_temp_resprate"))
+```
+
+Plot the data in the form of a performance curve
+
+```{r}
+temprates_summary$Treatment <- gsub("HS", "", temprates_summary$Treatment)#Rmove the HS from the cells
+temprates_summary$Treatment <- factor(temprates_summary$Treatment, levels = c("7.5", "12.5", "17.5", "22.5", "27.5"))#Set the order of the facets #Order the x axis
+tempresprate_plot <- temprates_summary %>% #filter(HS == "NOHS") %>% 
+  ggplot(aes(x=Treatment, y= temp_mean_resprate, group = Ploidy, colour = Ploidy))+geom_line()+
+  xlab("Temperature (°C)")+ylab("Mean oxygen consumption (µmol h-1 g-1)")+
+  geom_errorbar(aes(ymin=temp_mean_resprate-SEM, ymax = temp_mean_resprate+SEM, width = 0.2))+theme_bw(base_size = 20)+
+  scale_color_manual(values = c("#CD950C", "#00688B", "#8B0A50"),   # Custom colors for each group
+                     breaks = c("2m", "3m", "3c"),   # Names of your groups
+                     labels = c("Diploids", "Mated Triploids", "Induced Triploids" ))+   # Custom labels for each group
+  labs(color = "Ploidy")+  # Change the legend title to "Ploidy"
+  facet_wrap(~HS, nrow = 2)
+tempresprate_plot
+```
+
+### Statistical analysis of oxygen consumption
+
+Inspect the data
+
+```{r}
+hist(temp_resprates$mass_corected_rate)
+hist(sqrt((temp_resprates$mass_corected_rate+.001)))
+```
+
+The data looks best with a sqrt transformation. <Br>
+I am going to do a linear mixed model with tank as a random factor. Tank as a random factor. but first check that there is need for a random factor. 
+We compared the IAC using an ANOVA of the model that included a random tank effect and the model that did not have a random tank effect and found no differece, therefore we are not going to use a random tank effect in this analysis. This is for the non heat shocked individuals. 
+
+```{r}
+lm_temp_resp <- temp_resprates %>% filter(HS == "NOHS") %>% filter(mass_corected_rate != "NA") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, random = ~ 1|Tank, data=., method = "ML")
+lm_temp_resp_no_randomeff <- temp_resprates %>% filter(HS == "NOHS") %>% filter(mass_corected_rate != "NA") %>% 
+  lm(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, data=.)
+anova(lm_temp_resp, lm_temp_resp_no_randomeff)
+#
+# Calculate residuals
+# Extract random effects using ranef
+residuals <- resid(lm_temp_resp_no_randomeff)
+# Plot residuals
+par(mfrow = c(1, 2))  # Set up a 1x2 plotting grid
+plot(residuals, main = "Residuals vs. Fitted", xlab = "Fitted values", ylab = "Residuals")
+qqnorm(residuals, main = "Normal Q-Q Plot")
+qqline(residuals)  # Add a line to the Q-Q plot
+```
+
+Residuals suggest that the data is normally distributed so I will stick with a sqrt transformation. Here I will do the pairwise comparison using. There are significant differences in all so I am going to do pairwise comparisons. 
+
+```{r}
+anova(lm_temp_resp_no_randomeff)
+
+emmeans_lm_temp_resp <- emmeans(lm_temp_resp_no_randomeff, ~ Ploidy*Treatment)
+temp_resp_contrasts_noHS <- pairs(emmeans_lm_temp_resp)
+temp_resp_contrasts_noHS_df <-  as.data.frame(temp_resp_contrasts_noHS)
+sig_temp_resp_contrasts_noHS_df <- temp_resp_contrasts_noHS_df %>% filter(p.value <=0.08)
+sig_temp_resp_contrasts_noHS_df
+#write.csv(sig_temp_resp_contrasts_noHS_df, "sigtemprespcontrasts_noHS.csv")
+#heightgrowthlme_temp <- lmer(Shell.Height~Ploidy*Time*Treatment + (1|Tank), data = filter(sizedat_temp))
+
+```
+
+Repeat the above analyses for heat shocked individuals. Evaluate the models with fixed and no fixed effects. No differnce. Use the model with no fixed effects.
+```{r}
+lm_temp_resp_HS <- temp_resprates %>% filter(HS == "HS") %>% filter(mass_corected_rate != "NA") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, random = ~ 1|Tank, data=., method = "ML")
+lm_temp_resp_no_randomeff_HS <- temp_resprates %>% filter(HS == "HS") %>% filter(mass_corected_rate != "NA") %>% 
+  lm(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, data=.)
+anova(lm_temp_resp_HS, lm_temp_resp_no_randomeff_HS)
+```
+
+Do the analysis.
+```{r}
+anova(lm_temp_resp_no_randomeff_HS)
+emmeans_lm_temp_resp_HS <- emmeans(lm_temp_resp_no_randomeff_HS, ~ Treatment)
+temp_resp_contrasts_HS <- pairs(emmeans_lm_temp_resp_HS)
+temp_resp_contrasts_HS_df <-  as.data.frame(temp_resp_contrasts_HS)
+sig_temp_resp_contrasts_noHS_df <- temp_resp_contrasts_HS_df %>% filter(p.value <=0.08)
+sig_temp_resp_contrasts_noHS_df
 ```
 
 
@@ -659,11 +749,11 @@ Examine the distribution of the data
 
 ```{r}
 hist((pHresprates$Rate))
-hist(sqrt(pHresprates$Rate))
+hist(sqrt(pHresprates$Rate+0.001))
 
 ```
 
-A log transformation made the data much more normaly distributed. Thus log transformed data will be used for the statistical analyses
+A sqrt transformation made the data much more normaly distributed. Thus sqrt transformed data will be used for the statistical analyses
 
 ##### Non heat shocked individuals
 
@@ -672,10 +762,10 @@ A log transformation made the data much more normaly distributed. Thus log trans
 ```{r}
 #First create a model with no ransom effects
 pHresp_gls <- pHresprates %>% filter(HS == "NOHS") %>%
-  gls(Rate~Colour*pCO2, method="REML", data=.)
+  gls(sqrt(Rate+0.001)~Colour*pCO2, method="REML", data=.)
 #then create a model with random effects
 pHresp_lme <- pHresprates %>% filter(HS == "NOHS") %>%
-  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+  lme(sqrt(Rate+0.001)~Colour*pCO2, random = ~1 | Tank, data=.)
 
 anova(pHresp_gls, pHresp_lme)
 ```
@@ -686,7 +776,7 @@ No significant difference existed between the model that included the ransom eff
 #Because there are zeros in the data I am going to need to add a very small number to make the data transformable
 pHresprates$ratenozero <- pHresprates$Rate+0.01
 pHresp_lme <- pHresprates %>% filter(HS == "NOHS") %>%
-  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+  lm(sqrt(Rate+0.001)~Colour*pCO2, data=.)
 summary(pHresp_lme)
 anova(pHresp_lme)
 residuals <- resid(pHresp_lme)
@@ -702,10 +792,10 @@ Compare a model that includes random effects with one that doesn't
 ```{r}
 #First create a model with no ransom effects
 pHresp_gls_HS <- pHresprates %>% filter(HS == "HS") %>%
-  gls(Rate~Colour*pCO2, method="REML", data=.)
+  gls(sqrt(Rate+0.001)~Colour*pCO2, method="REML", data=.)
 #then create a model with random effects
 pHresp_lme_HS <- pHresprates %>% filter(HS == "HS") %>%
-  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+  lme(sqrt(Rate+0.001)~Colour*pCO2, random = ~1 | Tank, data=.)
 
 anova(pHresp_gls_HS, pHresp_lme_HS)
 ```
@@ -714,7 +804,7 @@ Adding a random effect does not improve the model significantly so I am going to
 
 ```{r}
 pHresp_lme_HS <- pHresprates %>% filter(HS == "HS") %>% 
-  lme(Rate~Colour*pCO2, random = ~1 | Tank, data=.)
+  lme(sqrt(Rate+0.001)~Colour*pCO2, random = ~1 | Tank, data=.)
 summary(pHresp_lme_HS)
 anova(pHresp_lme_HS)
 residuals <- resid(pHresp_lme_HS)
@@ -980,8 +1070,7 @@ Create a summary table of the data
 ```{r}
 DO_resp_summarytable <- DO_respdat %>% filter(masscorrectedrate != "NA") %>% 
   group_by(Ploidy, O2, HS) %>% 
-  summarise(n=n(), mean_rate=mean(masscorrectedrate), SEMrate=sd(masscorrectedrate)/sqrt(n()),
-            mean_rate_gramgram=mean(O2gramgram), SEMgramgram=sd(O2gramgram)/sqrt(n()))
+  summarise(n=n(), mean_rate=mean(masscorrectedrate), SEMrate=sd(masscorrectedrate)/sqrt(n()))
 ```
 
 Create physiological performance curves. Start for the non heat shocked individuals. For these analyses and plots I was unable to achieve 100% oxygen saturation so I am removing the 100% treatment from analyses.Physiological curves for heat shocked individuals. 
@@ -1030,14 +1119,15 @@ grid.arrange(PhyscurvDO, PhyscurvDOHS)
 Examine the distribution of the data
 ```{r}
 hist(DO_respdat$masscorrectedrate)
+
 ```
 
-The data was left skewed so a log transformation was performed
+The data was left skewed so a square root
 ```{r}
-hist(log(DO_respdat$masscorrectedrate))
+hist(sqrt((DO_respdat$masscorrectedrate+0.001))
 ```
 
-The logged data has a much more normal distribution so this will be used in the further analyses. 
+The sqrt data has a much more normal distribution so this will be used in the further analyses. 
 
 I am going to do a model selection procedure to determine if there is evidence that a random effect is needed
 
@@ -1045,18 +1135,18 @@ I am going to do a model selection procedure to determine if there is evidence t
 ```{r}
 #First model has no random effects
 DO_resp_gls <- DO_respdat %>% filter(HS == "NOHS") %>%
-  gls(masscorrectedrate~Ploidy*O2, method="REML", data=.)
+  gls(sqrt((masscorrectedrate+0.001))~Ploidy*O2, method="REML", data=.)
 #then create a model with random effects
 DOresp_lme <- DO_respdat %>% filter(HS == "NOHS") %>%
-  lme(masscorrectedrate~Ploidy*O2, random = ~1 | Tank, data=.)
+  lme(sqrt((masscorrectedrate+0.001))~Ploidy*O2, random = ~1 | Tank, data=.)
 anova(DO_resp_gls, DOresp_lme) #No significant differences between the models. AIC is within two for both. Going to use plain GLM
 ```
 
-There is no evedince to support the use of tank as a randeom effect so I will jsut perform a GLM
+There is no evidence to support the use of tank as a randeom effect so I will jsut perform a GLM
 
 ```{r}
 DOrespglm <- DO_respdat %>% filter(HS == "NOHS") %>%
-  lm(masscorrectedrate~Ploidy*O2, data=.)
+  lm(sqrt((masscorrectedrate+0.001))~Ploidy*O2, data=.)
 anova(DOrespglm)
 #There is a significant effect of ploidy in this experiment. 
 # Perform post-hoc pairwise tests
@@ -1073,10 +1163,10 @@ Diploids consume signifcantly more oxygen than mated triploids, but there was no
 ```{r}
 #First model has no random effects
 DO_resp_gls_HS <- DO_respdat %>% filter(HS == "HS") %>%
-  gls(masscorrectedrate~Ploidy*O2, method="REML", data=.)
+  gls(sqrt((masscorrectedrate+0.001))~Ploidy*O2, method="REML", data=.)
 #then create a model with random effects
 DOresp_lme_HS <- DO_respdat %>% filter(HS == "HS") %>%
-  lme(masscorrectedrate~Ploidy*O2, random = ~1 | Tank, data=.)
+  lme(sqrt((masscorrectedrate+0.001))~Ploidy*O2, random = ~1 | Tank, data=.)
 anova(DO_resp_gls_HS, DOresp_lme_HS) #No significant differences between the models. AIC is within two for both. Going to use plain GLM
 ```
 
@@ -1084,7 +1174,7 @@ There is no evedince to support the use of tank as a randeom effect so I will ju
 
 ```{r}
 DOrespglm_HS <- DO_respdat %>% filter(HS == "HS") %>%
-  lm(masscorrectedrate~Ploidy*O2, data=.)
+  lm(sqrt((masscorrectedrate+0.001))~Ploidy*O2, data=.)
 anova(DOrespglm_HS)
 #There is a significant effect of ploidy in this experiment. 
 # Perform post-hoc pairwise tests

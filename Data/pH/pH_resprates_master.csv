@@ -1,4 +1,4 @@
-,Treatment,Probe,Run,probe,rate,run,Respirometry.number,Date,Time,Tank,Colour,file.letter,Notes.druing.run,Notes.during.processing,Mass,bgrd,bgrdcorrectedrate,standardised_rate,HS,pCO2
+,Treatment,Probe,Run,probe,rate,run,Respirometry.number,Date,Time,Tank,Colour,file.letter,Notes.druing.run,Notes.during.processing,Mass,bgrd,bgrdcorrectedrate,mass_corected_rate,HS,Treatment
 1,1000,9,44,9,-0.133243847,44,291,11242023,1630,3,Green,g,,,0.1731,-0.048880049,-0.084363798,0.487370293,NOHS,1000
 2,1000,9,42,9,-0.1503277,42,277,11242023,1420,13,Red,e,,,0.4906,-0.048880049,-0.101447651,0.206782818,NOHS,1000
 3,1000,1,43,1,-0.107364499,43,278,11242023,1510,3,Blue,f,,,0.1775,-0.048880049,-0.05848445,0.329489858,NOHS,1000

@@ -411,6 +411,9 @@ summary(K1_pH)
 summary(K2_pH)
 summary(K3_pH)
 summary(K4_pH)
+
+survminer::pairwise_survdiff(Surv(Date, event, type = "right"), data = survival_eventdat_pH)
+ggforest(K4_pH)#Plot
 ```
 
 Results of these analyses show that there was as significant impact of pCO2 and ploidy on survival (when pooled). Significant interactions existed between ploidy and pCO2 levels. The graphs show that blue did not survive well in the highest pH treatement. 
