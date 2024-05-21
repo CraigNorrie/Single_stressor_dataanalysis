@@ -746,7 +746,7 @@ Mortality was low across all temperature treatments (@fig-temp_survival) with on
 
 Read in the mortality data and prepare it for analysis
 
-```{r, results='hide', echo=FALSE}
+```{r, results='hide'}
 temp_survivors <- read.csv(here("Data", "Temperature", "Temp__survivors.csv"))
 temp_survivors$Tank <- as.factor(temp_survivors$Tank)
 temp_tank_assignments <- read.csv(here("Data", "Temperature", "Temp_tank_assignments.csv"))
@@ -998,7 +998,7 @@ kable(survival_eventdat_DO %>% filter(Time <= 28) %>% group_by(Colour, DO) %>% s
 Differences in mortality were observed across ploidies and pH treatments. 250 mortalities were observed over the course of this experiment (@tbl-mortalties_pH; ). We analysed mortality using the survival package in R. 
 
 Read in the data
-```{r}
+```{r, , results='hide'}
 pH_mortdat <- read.csv(here("Data", "pH", "pH_mortality.csv"))
 pH_mortdattemplate <- read.csv(here("Data", "pH", "Mortality_template.csv"))
 pH_tanktrt <- read.csv(here("Data", "pH", "pH_Tank_assignments.csv"))
@@ -1101,7 +1101,7 @@ kable(survival_eventdat_pH %>% filter(Time <= 28) %>% group_by(Colour, CO2_level
 #| label: fig-mortalties_pH
 #| fig-cap: "Kaplan meyer survival plot of individuals from pH experiment in this study"
 #| warning: false
-#| 
+
 survival_eventdat_pH$CO2_level <- factor(survival_eventdat_pH$CO2_level, levels = c("0", "250", "500", "750", "1000"))#Set the order of the facets 
 survival_eventdat_pH$Date1 <- survival_eventdat_pH$Date+3#The sampling events were off by 1 day
 pooled_site_survplot_pH_pooled <- survival_eventdat_pH %>% 
@@ -1140,3 +1140,147 @@ pooled_site_survplot_pH_pooled
 #   scale_fill_manual(values = c("#CD950C","#00688B", "#8B0A50"))
 # longpooled_site_survplot_pH_pooled
 ```
+
+### Statistical analysis
+
+We analysed the data pooled for each treatment (i.e. no random tank factor) for all the data. The likleyhood ratio test indicated strong evidence against the null hypothesis that survival is the same across treatments and ploidies. 
+
+
+```{r, , results='hide'}
+#Create a survival object for analyses
+surv_pH <- with(survival_eventdat_pH, Surv(Date, event, type = "right"))#For some reason piping does not work here
+#Create the survival models
+K1_pH <- coxph(surv_pH ~ CO2_level , data = survival_eventdat_pH)
+K2_pH <- coxph(surv_pH ~ Colour , data = survival_eventdat_pH)
+K3_pH <- coxph(surv_pH ~ Colour + CO2_level, data = survival_eventdat_pH)
+K4_pH <- coxph(surv_pH ~ Colour * CO2_level, data = survival_eventdat_pH)
+
+summary(K1_pH)
+summary(K2_pH)
+summary(K3_pH)
+summary(K4_pH)
+anova(K4_pH)
+#survminer::pairwise_survdiff(Surv(Date, event, type = "right"), data = survival_eventdat_pH)
+ggforest(K4_pH)#visualise the data
+```
+
+In oprder to account for variation in mortality between tanks we performed a frailty analysis. This frailty analysis was akin to using a linear mixed model to analyse the data. 
+
+In the pooled mixed effects hazard model, the chamber random effect was found to significantly contribute to the variability in survival and therefore the mixed effects model was used for the population and maternal comparision analysis (Commenges-Andersen p = 1.7^{-10}; LRT p = 1.2^{-12}). 
+
+```{r, , results='hide'}
+survival_eventdat_pH1 <- survival_eventdat_pH %>% mutate(across(c("CO2_level","Tank", "Colour"), as.factor)) 
+survival_eventdat_pH1$Time <- as.numeric(survival_eventdat_pH1$Time)
+survival_eventdat_pH1$Time <- survival_eventdat_pH1$Time+1
+pH_frailty_fit <- survival_eventdat_pH1 %>% emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), 
+                                                    distribution = emfrail_dist(dist = "gamma"), data = .)
+
+
+pH_frailty_fit
+summary(pH_frailty_fit)
+
+ca_pval <- summary(pH_frailty_fit)$ca_test["pval"]
+lrt_pval <- summary(pH_frailty_fit)$loglik["pval"]
+```
+
+Because there was a significant effect of mortality I need to do pairwise comparisons to understand exactly which treatments differ from one another. To do this I will need to re level the data so that everything is compared against everything else as the base level. a for loop will do this for all the data 
+
+```{r, results='hide'}
+#First thing I want to do is get reference levels.
+# #First model has CO2 level 0 and colour Blue as the base levels
+# frail_blue_0 <- survival_eventdat_pH1 %>%
+#   mutate(CO2_level = factor(CO2_level, levels = c("0", "250", "500", "750", "1000"))) %>%
+#   mutate(Colour = factor(Colour, levels = c("Blue", "Red", "Green"))) %>% 
+#    emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), 
+#                                                     distribution = emfrail_dist(dist = "gamma"), data = .) %>%
+#   {.}
+# 
+# frail_blue_250 <- survival_eventdat_pH1 %>%
+#   mutate(CO2_level = factor(CO2_level, levels = c("250", "0", "500", "750", "1000"))) %>%
+#   mutate(Colour = factor(Colour, levels = c("Blue", "Red", "Green"))) %>% 
+#    emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), 
+#                                                     distribution = emfrail_dist(dist = "gamma"), data = .) %>%
+#   {.}
+#This for loop may change the order automatically and save yje result with the name pattern
+# Define the levels of CO2_Level
+CO2_levels <- c("0", "250", "500", "750", "1000")
+# Define the levels of Colour
+colours <- c("Blue", "Red", "Green")
+
+# Loop through each level of CO2_Level
+for (i in seq_along(CO2_levels)) {
+  # Define the new order of CO2_Level
+  new_order_CO2 <- c(CO2_levels[i], CO2_levels[-i])
+  
+  # Loop through each level of Colour
+  for (j in seq_along(colours)) {
+    # Define the new order of Colour
+    new_order_colour <- c(colours[j], colours[-j])
+    
+    # Update CO2_Level and Colour, and save as frail_[colour]_[x]
+    assign(paste0("frail_", colours[j], "_", CO2_levels[i]), 
+           survival_eventdat_pH1 %>%
+             mutate(CO2_level = factor(CO2_level, levels = new_order_CO2)) %>%
+             mutate(Colour = factor(Colour, levels = new_order_colour)) %>% 
+             emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), 
+                     distribution = emfrail_dist(dist = "gamma"), data = .))
+  }
+}
+
+###This code will then extract the coefficents and p values from the frailty objects. 
+# Create an empty dataframe to store results
+results_df <- data.frame(
+  Object_Name = character(),
+  Coefficient_Name = character(),
+  Coefficient_Value = numeric(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# List all objects in the environment
+all_objects <- ls()
+
+# Iterate over each object
+for (obj_name in all_objects) {
+  # Check if the object follows the pattern frail_[colour]_[number]
+  if (grepl("^frail_[A-Za-z]+_[0-9]+$", obj_name)) {
+    # Extract coefficients and p-values
+    coeff_p_val <- summary(get(obj_name))$coef[, c("coef", "p")]
+    
+    # Extract object details
+    obj_details <- unlist(strsplit(obj_name, "_"))
+    
+    # Add object name to the results dataframe
+    obj_df <- data.frame(
+      Object_Name = rep(obj_name, nrow(coeff_p_val)),
+      Coefficient_Name = rownames(coeff_p_val),
+      Coefficient_Value = coeff_p_val[, 1],
+      P_Value = coeff_p_val[, 2]
+    )
+    
+    # Append to results dataframe
+    results_df <- rbind(results_df, obj_df)
+  }
+}
+
+# Print the final dataframe
+
+sig_pairwise_diffs_survival_pCO2 <- results_df %>% filter(P_Value < 0.051)
+#only keep significant interactions
+sig_pairwise_diffs_survival_pCO2 <- sig_pairwise_diffs_survival_pCO2 %>% 
+  rename(Comparison_1 = Object_Name) %>% rename(Comparison_2 = Coefficient_Name) %>% 
+  mutate(Comparison_1 = gsub("frail_", "", Comparison_1)) %>% mutate(Comparison_2 = gsub("CO2_level", "", Comparison_2)) %>% 
+  mutate(Comparison_2 = gsub("Colour", "", Comparison_2))
+
+```
+
+Pairwise comparisons 
+
+```{r, echo=FALSE}
+#| label: tbl-pairwise_surv_pH
+#| tbl-cap: "Signifcant pairwise differences in survival from the frailty survival fit"
+#| warning: false
+
+kable(sig_pairwise_diffs_survival_pCO2, row.names = FALSE)
+```
+
