@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Single stressor data analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="single_stressor_survival_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="single_stressor_survival_analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="single_stressor_survival_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="single_stressor_survival_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="single_stressor_survival_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="single_stressor_survival_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="single_stressor_survival_analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="single_stressor_survival_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="single_stressor_survival_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="single_stressor_survival_analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Single stressor data analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="mortalitysurvival" class="level1">
+<h1>Mortality/Survival</h1>
+<section id="packages" class="level2">
+<h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<p>Several packages are used to analyse this data. To see these click “show code”</p>
+<div class="cell" data-warnings="hide">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggsurvfit)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survminer)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(frailtyEM)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nlme)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(report)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="temperature" class="level2">
+<h2 class="anchored" data-anchor-id="temperature">Temperature</h2>
+<p>Mortality was low across all temperature treatments (<a href="#fig-temp_survival" class="quarto-xref">Figure&nbsp;1</a>) with only 18 = moralities observed of a total of 1350 individuals (1.3% mortality; <a href="#tbl-mortalties_temp" class="quarto-xref">Table&nbsp;1</a>). There was no pattern of mortality across diploids or treatment. Due to the lack of mortality observed, we did not perform statistical analyses on temperature mortality data.</p>
+<p>Read in the mortality data and prepare it for analysis</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>temp_survivors <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Temperature"</span>, <span class="st">"Temp__survivors.csv"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>temp_survivors<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(temp_survivors<span class="sc">$</span>Tank)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>temp_tank_assignments <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"Temperature"</span>, <span class="st">"Temp_tank_assignments.csv"</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Uncount each of the rows in the first survivor colum</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>individ_mortdat_temp <span class="ot">&lt;-</span> temp_survivors <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">uncount</span>(<span class="at">weights =</span> Surv_1)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>individ_mortdat_temp<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(individ_mortdat_temp))<span class="co">#Add an ID column so each individual has a unique ID</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>individ_mortdat_temp<span class="sc">$</span>status_Surv_0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a df to store all survival event data for analyes</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> individ_mortdat_temp</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">#create a for loop that gives all survivors a status across all</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">31</span>) {</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the current column name</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  current_column_name <span class="ot">&lt;-</span> <span class="fu">colnames</span>(temp_survivors)[i]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove "Survivors_" from the current column name</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  stripped_column_name <span class="ot">&lt;-</span> current_column_name</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a new column name based on the stripped current column name</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"status_"</span>, stripped_column_name)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Uncount the specified column</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> temp_survivors[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, i)] <span class="sc">%&gt;%</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">weights =</span> <span class="fu">as.numeric</span>(<span class="fu">get</span>(current_column_name))) <span class="sc">%&gt;%</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">uncount</span>(weights)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add an ID column from 1 to 15</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> survivors_column <span class="sc">%&gt;%</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a status column to indicate that these individuals are alive</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  survivors_column[[new_column_name]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the data frames</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  survival_eventdat_temp <span class="ot">&lt;-</span> <span class="fu">left_join</span>(survival_eventdat_temp, survivors_column, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"ID"</span>))</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co">#Select the columns that status at the begining</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> survival_eventdat_temp <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"Surv"</span>))</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">#Now need to pivot longer for survival plots</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> survival_eventdat_temp <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">names_to =</span> <span class="st">"Time"</span>, <span class="at">values_to =</span> <span class="st">"Status"</span>)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove the status from the time column</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> survival_eventdat_temp <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Surv_"</span>, <span class="st">""</span>, Time))</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="co">#Add 1 where there is a NA</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp<span class="sc">$</span>Status[<span class="fu">is.na</span>(survival_eventdat_temp<span class="sc">$</span>Status)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> survival_eventdat_temp <span class="sc">%&gt;%</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Tank, Colour, ID) <span class="sc">%&gt;%</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> <span class="fu">which.max</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|</span> <span class="fu">sum</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a><span class="co">#Make sure that the sum of mortality events actually matches the number of mortalities. In the temperature experiment this was 20</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp<span class="sc">$</span>event <span class="ot">&lt;-</span> survival_eventdat_temp<span class="sc">$</span>Status</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_temp<span class="sc">$</span>Time)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(survival_eventdat_temp<span class="sc">$</span>Status)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="co">#Merge the file with the list of treatment tanks</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp <span class="ot">&lt;-</span> <span class="fu">merge</span>(survival_eventdat_temp, temp_tank_assignments, <span class="at">by =</span> <span class="st">"Tank"</span>)</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>survival_eventdat_temp<span class="sc">$</span>Colour <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(survival_eventdat_temp<span class="sc">$</span>Colour)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Visualise the data</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-temp_survival" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp_survival-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="single_stressor_survival_analysis_files/figure-html/fig-temp_survival-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp_survival-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Kaplan Meyer survival plot showing survival across temperature treatments for each ploidy group
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_temp" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Number of mortalities of each temperature and ploidy in the temperature experiment
+</figcaption>
+<div aria-describedby="tbl-mortalties_temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: left;">Temp</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">7.5</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">12.5</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">17.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">22.5</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">27.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="disolved-oxygen" class="level2">
+<h2 class="anchored" data-anchor-id="disolved-oxygen">Disolved oxygen</h2>
+<p>Mortality was also low in the disolved oxygen experiment. 18 Mortalities were observed across all treatments and ploidies. This accounts for 1.3% mortality. Although the majority of moralities occured in the 20% oxygen level treatment (<a href="#tbl-mortalties_Do" class="quarto-xref">Table&nbsp;2</a>; <a href="#fig-mortalties_Do" class="quarto-xref">Figure&nbsp;2</a>)</p>
+<p>Read in the mortality data, and format it so that I can run survival analyses.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>DO_survivors <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO__survivors.csv"</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>DO_survivors<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(DO_survivors<span class="sc">$</span>Tank)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>DO_tank_assignments <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"DO"</span>, <span class="st">"DO_tank_assignments.csv"</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Uncount each of the rows in the first survivor colum</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO <span class="ot">&lt;-</span> DO_survivors <span class="sc">%&gt;%</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">uncount</span>(<span class="at">weights =</span> Surv_1)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(individ_mortdat_DO))<span class="co">#Add an ID column so each individual has a unique ID</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>individ_mortdat_DO<span class="sc">$</span>status_Surv_0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a df to store all survival event data for analyes</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> individ_mortdat_DO</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#create a for loop that gives all survivors a status across all</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">34</span>) {</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the current column name</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  current_column_name <span class="ot">&lt;-</span> <span class="fu">colnames</span>(DO_survivors)[i]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove "Survivors_" from the current column name</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  stripped_column_name <span class="ot">&lt;-</span> current_column_name</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a new column name based on the stripped current column name</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"status_"</span>, stripped_column_name)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Uncount the specified column</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> DO_survivors[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, i)] <span class="sc">%&gt;%</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">weights =</span> <span class="fu">as.numeric</span>(<span class="fu">get</span>(current_column_name))) <span class="sc">%&gt;%</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">uncount</span>(weights)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add an ID column from 1 to 15</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> survivors_column <span class="sc">%&gt;%</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a status column to indicate that these individuals are alive</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  survivors_column[[new_column_name]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the data frames</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  survival_eventdat_DO <span class="ot">&lt;-</span> <span class="fu">left_join</span>(survival_eventdat_DO, survivors_column, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"ID"</span>))</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#Select the columns that status at the begining</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"Surv"</span>))</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#Now need to pivot longer for survival plots</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">names_to =</span> <span class="st">"Time"</span>, <span class="at">values_to =</span> <span class="st">"Status"</span>)</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove the status from the time column</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Surv_"</span>, <span class="st">""</span>, Time))</span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#Add 1 where there is a NA</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>Status[<span class="fu">is.na</span>(survival_eventdat_DO<span class="sc">$</span>Status)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="co">#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> survival_eventdat_DO <span class="sc">%&gt;%</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Tank, Colour, ID) <span class="sc">%&gt;%</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> <span class="fu">which.max</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|</span> <span class="fu">sum</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#Make sure that the sum of mortality events actually matches the number of mortalities. In the DOerature experiment this was 20</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>event <span class="ot">&lt;-</span> survival_eventdat_DO<span class="sc">$</span>Status</span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_DO<span class="sc">$</span>Time)</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(survival_eventdat_DO<span class="sc">$</span>Status)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 73</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Merge the file with the list of treatment tanks</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>survival_eventdat_DO <span class="ot">&lt;-</span> <span class="fu">merge</span>(survival_eventdat_DO, DO_tank_assignments, <span class="at">by =</span> <span class="st">"Tank"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Plot the mortality between tanks faceted by DO level</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-mortalties_Do" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="single_stressor_survival_analysis_files/figure-html/fig-mortalties_Do-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Kaplan Meyer survival curves across disolved oxygen levels in this study
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_Do" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Number of mortalities of each temperature and ploidy in the disolved oxygen experiment
+</figcaption>
+<div aria-describedby="tbl-mortalties_Do-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: left;">DO</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">20</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">40</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">60</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">80</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: left;">100</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="pco2" class="level2">
+<h2 class="anchored" data-anchor-id="pco2">pCO2</h2>
+<p>Differences in mortality were observed across ploidies and pH treatments. 250 mortalities were observed over the course of this experiment (<a href="#tbl-mortalties_pH" class="quarto-xref">Table&nbsp;3</a>; ). We analysed mortality using the survival package in R.</p>
+<p>Read in the data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pH_mortdat <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_mortality.csv"</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>pH_mortdattemplate <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"Mortality_template.csv"</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>pH_tanktrt <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data"</span>, <span class="st">"pH"</span>, <span class="st">"pH_Tank_assignments.csv"</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>pH_mortdat<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(pH_mortdat<span class="sc">$</span>Tank)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pH_mortdattemplate<span class="sc">$</span>Tank <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(pH_mortdattemplate<span class="sc">$</span>Tank)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#merge the data with the tempalate</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> <span class="fu">left_join</span>(pH_mortdattemplate, pH_mortdat, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Date"</span>, <span class="st">"Colour"</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Replace the NAs with zeros</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Number_Morts =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(Number_Morts), <span class="dv">0</span>, Number_Morts))</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#Now need to pivot wider to get the dates so we can subtract the dates</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span> <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(Tank, Colour),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                                                           <span class="at">names_from=</span><span class="st">'Date'</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                                                           <span class="at">values_from=</span><span class="st">'Number_Morts'</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Add a new collumn that has the total number per group at the start of the experiment (Think it was 15)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded<span class="sc">$</span>Survivors_Nov_2 <span class="ot">&lt;-</span> <span class="dv">15</span><span class="sc">-</span>ph_mortdat_expanded<span class="sc">$</span>Nov_02</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#calculate survivors at each time interval </span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">10</span>) {</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  survivors <span class="ot">&lt;-</span> ph_mortdat_expanded[, i<span class="sc">+</span><span class="dv">7</span>] <span class="sc">-</span> ph_mortdat_expanded[, i]</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create new column name</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"Survivors_"</span>, <span class="fu">colnames</span>(ph_mortdat_expanded)[i])</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add new column with survivors</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  ph_mortdat_expanded[, new_column_name] <span class="ot">&lt;-</span> survivors</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#now I need to create a df with 15 rows for each of the tanks and ploidys</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated <span class="ot">&lt;-</span> ph_mortdat_expanded <span class="sc">%&gt;%</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">row_id =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="fu">rep</span>(row_id, <span class="at">each =</span> <span class="dv">15</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">#Now add in an id column where we repeat 1-15 for each tank</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, <span class="at">length.out =</span> <span class="fu">nrow</span>(ph_mortdat_expanded_repeated))</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co">#add a status for the start of teh experiment, 0 indicates an indivvidual was alive </span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>ph_mortdat_expanded_repeated<span class="sc">$</span>status_Sep_30 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a df to store all survival event data for analyes####################I FUCKED THIS UP SOMEHOW, GO BACK AND FIX IT#################!!!!!</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">11</span><span class="sc">:</span><span class="dv">18</span>) {</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extract the current column name</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  current_column_name <span class="ot">&lt;-</span> <span class="fu">colnames</span>(ph_mortdat_expanded)[i]</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove "Survivors_" from the current column name</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>  stripped_column_name <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"Survivors_"</span>, <span class="st">""</span>, current_column_name)<span class="co">#Here I should remove "surv" from name</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Create a new column name based on the stripped current column name</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>  new_column_name <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"status_"</span>, stripped_column_name)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Uncount the specified column ###################THIS IS WHERE THINGS GO WRONG HERE###################</span></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> ph_mortdat_expanded[<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, i)] <span class="sc">%&gt;%</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">weights =</span> <span class="fu">as.numeric</span>(<span class="fu">get</span>(current_column_name))) <span class="sc">%&gt;%</span></span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">uncount</span>(weights)</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add an ID column from 1 to 15</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  survivors_column <span class="ot">&lt;-</span> survivors_column <span class="sc">%&gt;%</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>()</span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a status column to indicate that these individuals are alive</span></span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>  survivors_column[[new_column_name]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Join the data frames</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>  ph_mortdat_expanded_repeated <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ph_mortdat_expanded_repeated, survivors_column, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"Tank"</span>, <span class="st">"Colour"</span>, <span class="st">"ID"</span>))</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="co">#Now select only the coluimns that have the status</span></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> ph_mortdat_expanded_repeated <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">starts_with</span>(<span class="st">"Surv"</span>))</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="co">#Pivot longer </span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">pivot_longer</span>(<span class="at">cols=</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">names_to =</span> <span class="st">"Time"</span>, <span class="at">values_to =</span> <span class="st">"Status"</span>)</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="co">#Remove the added dates from the time columns</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Nov_"</span>, <span class="st">""</span>, Time))</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Time =</span> <span class="fu">gsub</span>(<span class="st">"status_Sep_30"</span>, <span class="st">"0"</span>, Time))</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="co">#Add 1 where there is a NA</span></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>Status[<span class="fu">is.na</span>(survival_eventdat_pH<span class="sc">$</span>Status)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="co">#Only keep the first instance of 1 (An individual can only die once - Cue James Bond music).</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Tank, Colour, ID) <span class="sc">%&gt;%</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">&lt;=</span> <span class="fu">which.max</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">|</span> <span class="fu">sum</span>(Status <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="co">#Add an "event column</span></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>event <span class="ot">&lt;-</span> survival_eventdat_pH<span class="sc">$</span>Status</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH<span class="sc">$</span>Date <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_pH<span class="sc">$</span>Time)</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="co">#Make sure that the sum of mortality events actually matches the number of mortalities. In the temperature experiment this was 250</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(survival_eventdat_pH<span class="sc">$</span>Status)</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="co">#Join the CO2 data so we have a CO2 Level for each of our variables</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH <span class="ot">&lt;-</span> <span class="fu">merge</span>(survival_eventdat_pH,pH_tanktrt, <span class="at">by =</span> <span class="st">"Tank"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div id="tbl-mortalties_pH" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Number of mortalities of each temperature and ploidy in the pCO2 experiment. Blue = diploids, red = induced triploids, green = mated triploids
+</figcaption>
+<div aria-describedby="tbl-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Colour</th>
+<th style="text-align: right;">CO2_level</th>
+<th style="text-align: right;">sum</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">17</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">29</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">27</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">750</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">24</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-mortalties_pH" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="single_stressor_survival_analysis_files/figure-html/fig-mortalties_pH-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mortalties_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Kaplan meyer survival plot of individuals from pH experiment in this study. CO2 levels are relative to ambient. Will change to absolute for final MS
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="statistical-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="statistical-analysis">Statistical analysis</h3>
+<p>We analysed the data pooled for each treatment (i.e.&nbsp;no random tank factor) for all the data. The liklihood ratio test indicated strong evidence against the null hypothesis that survival is the same across treatments and ploidies (<a href="#tbl-coxph_anova_pH" class="quarto-xref">Table&nbsp;4</a>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Create a survival object for analyses</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>surv_pH <span class="ot">&lt;-</span> <span class="fu">with</span>(survival_eventdat_pH, <span class="fu">Surv</span>(Date, event, <span class="at">type =</span> <span class="st">"right"</span>))<span class="co">#For some reason piping does not work here</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Create the survival models</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>K1_pH <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_pH <span class="sc">~</span> CO2_level , <span class="at">data =</span> survival_eventdat_pH)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>K2_pH <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_pH <span class="sc">~</span> Colour , <span class="at">data =</span> survival_eventdat_pH)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>K3_pH <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_pH <span class="sc">~</span> Colour <span class="sc">+</span> CO2_level, <span class="at">data =</span> survival_eventdat_pH)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>K4_pH <span class="ot">&lt;-</span> <span class="fu">coxph</span>(surv_pH <span class="sc">~</span> Colour <span class="sc">*</span> CO2_level, <span class="at">data =</span> survival_eventdat_pH)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(K1_pH)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(K2_pH)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(K3_pH)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(K4_pH)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(K4_pH)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">#pairwise comparisons for the pooled model</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">survfit</span>(K4_pH, <span class="at">newdata =</span> survival_eventdat_pH)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggforest</span>(K4_pH, <span class="at">data =</span> survival_eventdat_pH)<span class="co">#visualise the data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="single_stressor_survival_analysis_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Call:
+coxph(formula = surv_pH ~ Colour * CO2_level, data = survival_eventdat_pH)
+
+  n= 4880, number of events= 250 
+
+                              coef exp(coef) se(coef)      z Pr(&gt;|z|)    
+ColourGreen                0.82126   2.27336  0.41223  1.992 0.046347 *  
+ColourRed                  0.22406   1.25115  0.44947  0.499 0.618125    
+CO2_level250              -0.01695   0.98320  0.47141 -0.036 0.971323    
+CO2_level500               0.14435   1.15529  0.45947  0.314 0.753398    
+CO2_level750              -0.16465   0.84819  0.48591 -0.339 0.734719    
+CO2_level1000              1.44267   4.23197  0.38498  3.747 0.000179 ***
+ColourGreen:CO2_level250  -0.35439   0.70160  0.59831 -0.592 0.553641    
+ColourRed:CO2_level250     0.13276   1.14198  0.62966  0.211 0.833002    
+ColourGreen:CO2_level500   0.42057   1.52282  0.55984  0.751 0.452518    
+ColourRed:CO2_level500     0.31483   1.37003  0.60376  0.521 0.602051    
+ColourGreen:CO2_level750   1.07460   2.92882  0.57397  1.872 0.061176 .  
+ColourRed:CO2_level750     0.59714   1.81692  0.62745  0.952 0.341249    
+ColourGreen:CO2_level1000 -0.67386   0.50974  0.49398 -1.364 0.172525    
+ColourRed:CO2_level1000   -0.40289   0.66839  0.52984 -0.760 0.447018    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+                          exp(coef) exp(-coef) lower .95 upper .95
+ColourGreen                  2.2734     0.4399    1.0134     5.100
+ColourRed                    1.2512     0.7993    0.5185     3.019
+CO2_level250                 0.9832     1.0171    0.3903     2.477
+CO2_level500                 1.1553     0.8656    0.4694     2.843
+CO2_level750                 0.8482     1.1790    0.3273     2.198
+CO2_level1000                4.2320     0.2363    1.9900     9.000
+ColourGreen:CO2_level250     0.7016     1.4253    0.2172     2.267
+ColourRed:CO2_level250       1.1420     0.8757    0.3324     3.923
+ColourGreen:CO2_level500     1.5228     0.6567    0.5083     4.562
+ColourRed:CO2_level500       1.3700     0.7299    0.4196     4.474
+ColourGreen:CO2_level750     2.9288     0.3414    0.9509     9.021
+ColourRed:CO2_level750       1.8169     0.5504    0.5312     6.215
+ColourGreen:CO2_level1000    0.5097     1.9618    0.1936     1.342
+ColourRed:CO2_level1000      0.6684     1.4961    0.2366     1.888
+
+Concordance= 0.673  (se = 0.018 )
+Likelihood ratio test= 93.35  on 14 df,   p=9e-14
+Wald test            = 91.04  on 14 df,   p=2e-13
+Score (logrank) test = 105  on 14 df,   p=5e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-coxph_anova_pH" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-coxph_anova_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: ANOVA style Results of the cox survival curve
+</figcaption>
+<div aria-describedby="tbl-coxph_anova_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">loglik</th>
+<th style="text-align: right;">Chisq</th>
+<th style="text-align: right;">Df</th>
+<th style="text-align: right;">Pr(&gt;|Chi|)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">NULL</td>
+<td style="text-align: right;">-1959.928</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour</td>
+<td style="text-align: right;">-1944.800</td>
+<td style="text-align: right;">30.25657</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.0000003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">CO2_level</td>
+<td style="text-align: right;">-1922.079</td>
+<td style="text-align: right;">45.44243</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.0000000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colour:CO2_level</td>
+<td style="text-align: right;">-1913.255</td>
+<td style="text-align: right;">17.64860</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.0240210</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>In order to account for variation in mortality between tanks we performed a frailty analysis. This frailty analysis was akin to using a linear mixed model to analyse the data.</p>
+<p>In the mixed effects hazard model, the tank random effect was found to significantly contribute to the variability in survival and therefore the mixed effects model was used for the ploidy and pCO2 analysis (Commenges-Andersen p = 1.6^{-12}; LRT p = 1.7^{-10}).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH1 <span class="ot">&lt;-</span> survival_eventdat_pH <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">"CO2_level"</span>,<span class="st">"Tank"</span>, <span class="st">"Colour"</span>), as.factor)) </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH1<span class="sc">$</span>Time <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(survival_eventdat_pH1<span class="sc">$</span>Time)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>survival_eventdat_pH1<span class="sc">$</span>Time <span class="ot">&lt;-</span> survival_eventdat_pH1<span class="sc">$</span>Time<span class="sc">+</span><span class="dv">1</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pH_frailty_fit <span class="ot">&lt;-</span> survival_eventdat_pH1 <span class="sc">%&gt;%</span> <span class="fu">emfrail</span>(<span class="fu">Surv</span>(Time, event, <span class="at">type =</span> <span class="st">"right"</span>) <span class="sc">~</span> CO2_level<span class="sc">*</span>Colour <span class="sc">+</span> <span class="fu">cluster</span>(Tank), </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                                                    <span class="at">distribution =</span> <span class="fu">emfrail_dist</span>(<span class="at">dist =</span> <span class="st">"gamma"</span>), <span class="at">data =</span> .)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>pH_frailty_fit</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pH_frailty_fit)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>ca_pval <span class="ot">&lt;-</span> <span class="fu">summary</span>(pH_frailty_fit)<span class="sc">$</span>ca_test[<span class="st">"pval"</span>]</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>lrt_pval <span class="ot">&lt;-</span> <span class="fu">summary</span>(pH_frailty_fit)<span class="sc">$</span>loglik[<span class="st">"pval"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To understand exactly which treatments differ from one another pairwise comparisons were conducted. To do this the data was releveled to provide comparisons between each ploidy and pCO2 level.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#First thing I want to do is get reference levels.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># #First model has CO2 level 0 and colour Blue as the base levels</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># frail_blue_0 &lt;- survival_eventdat_pH1 %&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(CO2_level = factor(CO2_level, levels = c("0", "250", "500", "750", "1000"))) %&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(Colour = factor(Colour, levels = c("Blue", "Red", "Green"))) %&gt;% </span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), </span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                     distribution = emfrail_dist(dist = "gamma"), data = .) %&gt;%</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   {.}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># frail_blue_250 &lt;- survival_eventdat_pH1 %&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(CO2_level = factor(CO2_level, levels = c("250", "0", "500", "750", "1000"))) %&gt;%</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(Colour = factor(Colour, levels = c("Blue", "Red", "Green"))) %&gt;% </span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#    emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), </span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                     distribution = emfrail_dist(dist = "gamma"), data = .) %&gt;%</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   {.}</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#This for loop may change the order automatically and save the result with the name pattern</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the levels of CO2_Level</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>CO2_levels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"0"</span>, <span class="st">"250"</span>, <span class="st">"500"</span>, <span class="st">"750"</span>, <span class="st">"1000"</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the levels of Colour</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>colours <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Blue"</span>, <span class="st">"Red"</span>, <span class="st">"Green"</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through each level of CO2_Level</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(CO2_levels)) {</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Define the new order of CO2_Level</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  new_order_CO2 <span class="ot">&lt;-</span> <span class="fu">c</span>(CO2_levels[i], CO2_levels[<span class="sc">-</span>i])</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Loop through each level of Colour</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">seq_along</span>(colours)) {</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define the new order of Colour</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    new_order_colour <span class="ot">&lt;-</span> <span class="fu">c</span>(colours[j], colours[<span class="sc">-</span>j])</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update CO2_Level and Colour, and save as frail_[colour]_[x]</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">"frail_"</span>, colours[j], <span class="st">"_"</span>, CO2_levels[i]), </span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>           survival_eventdat_pH1 <span class="sc">%&gt;%</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>             <span class="fu">mutate</span>(<span class="at">CO2_level =</span> <span class="fu">factor</span>(CO2_level, <span class="at">levels =</span> new_order_CO2)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>             <span class="fu">mutate</span>(<span class="at">Colour =</span> <span class="fu">factor</span>(Colour, <span class="at">levels =</span> new_order_colour)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>             <span class="fu">emfrail</span>(<span class="fu">Surv</span>(Time, event, <span class="at">type =</span> <span class="st">"right"</span>) <span class="sc">~</span> CO2_level<span class="sc">*</span>Colour <span class="sc">+</span> <span class="fu">cluster</span>(Tank), </span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>                     <span class="at">distribution =</span> <span class="fu">emfrail_dist</span>(<span class="at">dist =</span> <span class="st">"gamma"</span>), <span class="at">data =</span> .))</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a><span class="do">###This code will then extract the coefficents and p values from the frailty objects. </span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an empty dataframe to store results</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>results_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">Object_Name =</span> <span class="fu">character</span>(),</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">Coefficient_Name =</span> <span class="fu">character</span>(),</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">Coefficient_Value =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">P_Value =</span> <span class="fu">numeric</span>(),</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="co"># List all objects in the environment</span></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>all_objects <span class="ot">&lt;-</span> <span class="fu">ls</span>()</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Iterate over each object</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (obj_name <span class="cf">in</span> all_objects) {</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Check if the object follows the pattern frail_[colour]_[number]</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">grepl</span>(<span class="st">"^frail_[A-Za-z]+_[0-9]+$"</span>, obj_name)) {</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract coefficients and p-values</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    coeff_p_val <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">get</span>(obj_name))<span class="sc">$</span>coef[, <span class="fu">c</span>(<span class="st">"coef"</span>, <span class="st">"p"</span>)]</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract object details</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    obj_details <span class="ot">&lt;-</span> <span class="fu">unlist</span>(<span class="fu">strsplit</span>(obj_name, <span class="st">"_"</span>))</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add object name to the results dataframe</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    obj_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">Object_Name =</span> <span class="fu">rep</span>(obj_name, <span class="fu">nrow</span>(coeff_p_val)),</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">Coefficient_Name =</span> <span class="fu">rownames</span>(coeff_p_val),</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">Coefficient_Value =</span> coeff_p_val[, <span class="dv">1</span>],</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>      <span class="at">P_Value =</span> coeff_p_val[, <span class="dv">2</span>]</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to results dataframe</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    results_df <span class="ot">&lt;-</span> <span class="fu">rbind</span>(results_df, obj_df)</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the final dataframe</span></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>sig_pairwise_diffs_survival_pCO2 <span class="ot">&lt;-</span> results_df <span class="sc">%&gt;%</span> <span class="fu">filter</span>(P_Value <span class="sc">&lt;</span> <span class="fl">0.051</span>)</span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a><span class="co">#only keep significant interactions</span></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>sig_pairwise_diffs_survival_pCO2 <span class="ot">&lt;-</span> sig_pairwise_diffs_survival_pCO2 <span class="sc">%&gt;%</span> </span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Base_level =</span> Object_Name) <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">Comparison =</span> Coefficient_Name) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Base_level =</span> <span class="fu">gsub</span>(<span class="st">"frail_"</span>, <span class="st">""</span>, Base_level)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">Comparison =</span> <span class="fu">gsub</span>(<span class="st">"CO2_level"</span>, <span class="st">""</span>, Comparison)) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Comparison =</span> <span class="fu">gsub</span>(<span class="st">"Colour"</span>, <span class="st">""</span>, Comparison))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Significant pairwise comparisons</p>
+<div class="cell">
+<div id="tbl-pairwise_surv_pH" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pairwise_surv_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: Signifcant pairwise differences in survival from the frailty survival fit
+</figcaption>
+<div aria-describedby="tbl-pairwise_surv_pH-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Base_level</th>
+<th style="text-align: left;">Comparison</th>
+<th style="text-align: right;">Coefficient_Value</th>
+<th style="text-align: right;">P_Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Blue_0</td>
+<td style="text-align: left;">1000</td>
+<td style="text-align: right;">1.4543622</td>
+<td style="text-align: right;">0.0138973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_0</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">0.8082064</td>
+<td style="text-align: right;">0.0500751</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.4543622</td>
+<td style="text-align: right;">0.0138973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">250</td>
+<td style="text-align: right;">-1.4399686</td>
+<td style="text-align: right;">0.0148892</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: right;">-1.3612380</td>
+<td style="text-align: right;">0.0192445</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">750</td>
+<td style="text-align: right;">-1.6320348</td>
+<td style="text-align: right;">0.0067766</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">500:Red</td>
+<td style="text-align: right;">0.9725935</td>
+<td style="text-align: right;">0.0485919</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">750:Red</td>
+<td style="text-align: right;">1.0304049</td>
+<td style="text-align: right;">0.0478239</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">500:Green</td>
+<td style="text-align: right;">1.8166551</td>
+<td style="text-align: right;">0.0002009</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_1000</td>
+<td style="text-align: left;">750:Green</td>
+<td style="text-align: right;">1.7479180</td>
+<td style="text-align: right;">0.0003135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_250</td>
+<td style="text-align: left;">1000</td>
+<td style="text-align: right;">1.4399686</td>
+<td style="text-align: right;">0.0148892</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_250</td>
+<td style="text-align: left;">500:Green</td>
+<td style="text-align: right;">1.4186645</td>
+<td style="text-align: right;">0.0167315</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_250</td>
+<td style="text-align: left;">750:Green</td>
+<td style="text-align: right;">1.3499274</td>
+<td style="text-align: right;">0.0222973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_500</td>
+<td style="text-align: left;">1000</td>
+<td style="text-align: right;">1.3612380</td>
+<td style="text-align: right;">0.0192445</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_500</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1.9263513</td>
+<td style="text-align: right;">0.0000020</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_500</td>
+<td style="text-align: left;">1000:Red</td>
+<td style="text-align: right;">-0.9725935</td>
+<td style="text-align: right;">0.0485919</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_500</td>
+<td style="text-align: left;">250:Green</td>
+<td style="text-align: right;">-1.4186645</td>
+<td style="text-align: right;">0.0167315</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_500</td>
+<td style="text-align: left;">1000:Green</td>
+<td style="text-align: right;">-1.8166551</td>
+<td style="text-align: right;">0.0002009</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_750</td>
+<td style="text-align: left;">1000</td>
+<td style="text-align: right;">1.6320348</td>
+<td style="text-align: right;">0.0067766</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_750</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1.8576142</td>
+<td style="text-align: right;">0.0000036</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_750</td>
+<td style="text-align: left;">1000:Red</td>
+<td style="text-align: right;">-1.0304049</td>
+<td style="text-align: right;">0.0478239</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Blue_750</td>
+<td style="text-align: left;">250:Green</td>
+<td style="text-align: right;">-1.3499274</td>
+<td style="text-align: right;">0.0222973</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Blue_750</td>
+<td style="text-align: left;">1000:Green</td>
+<td style="text-align: right;">-1.7479180</td>
+<td style="text-align: right;">0.0003135</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_0</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: right;">1.2112692</td>
+<td style="text-align: right;">0.0329046</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_0</td>
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">-0.8082064</td>
+<td style="text-align: right;">0.0500751</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_1000</td>
+<td style="text-align: left;">500:Blue</td>
+<td style="text-align: right;">-1.8166550</td>
+<td style="text-align: right;">0.0002009</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_1000</td>
+<td style="text-align: left;">750:Blue</td>
+<td style="text-align: right;">-1.7479180</td>
+<td style="text-align: right;">0.0003135</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_250</td>
+<td style="text-align: left;">500</td>
+<td style="text-align: right;">1.4973952</td>
+<td style="text-align: right;">0.0102916</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_250</td>
+<td style="text-align: left;">750</td>
+<td style="text-align: right;">1.1578612</td>
+<td style="text-align: right;">0.0387673</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_250</td>
+<td style="text-align: left;">500:Blue</td>
+<td style="text-align: right;">-1.4186645</td>
+<td style="text-align: right;">0.0167315</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_250</td>
+<td style="text-align: left;">750:Blue</td>
+<td style="text-align: right;">-1.3499274</td>
+<td style="text-align: right;">0.0222973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">-1.2112692</td>
+<td style="text-align: right;">0.0329046</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">250</td>
+<td style="text-align: right;">-1.4973952</td>
+<td style="text-align: right;">0.0102916</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">-1.9263513</td>
+<td style="text-align: right;">0.0000020</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">-1.1473182</td>
+<td style="text-align: right;">0.0007702</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">250:Blue</td>
+<td style="text-align: right;">1.4186645</td>
+<td style="text-align: right;">0.0167315</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_500</td>
+<td style="text-align: left;">1000:Blue</td>
+<td style="text-align: right;">1.8166551</td>
+<td style="text-align: right;">0.0002009</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_750</td>
+<td style="text-align: left;">250</td>
+<td style="text-align: right;">-1.1578612</td>
+<td style="text-align: right;">0.0387673</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_750</td>
+<td style="text-align: left;">Blue</td>
+<td style="text-align: right;">-1.8576142</td>
+<td style="text-align: right;">0.0000036</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_750</td>
+<td style="text-align: left;">Red</td>
+<td style="text-align: right;">-1.0207696</td>
+<td style="text-align: right;">0.0013734</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Green_750</td>
+<td style="text-align: left;">250:Blue</td>
+<td style="text-align: right;">1.3499274</td>
+<td style="text-align: right;">0.0222973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Green_750</td>
+<td style="text-align: left;">1000:Blue</td>
+<td style="text-align: right;">1.7479180</td>
+<td style="text-align: right;">0.0003135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red_1000</td>
+<td style="text-align: left;">500:Blue</td>
+<td style="text-align: right;">-0.9725935</td>
+<td style="text-align: right;">0.0485919</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red_1000</td>
+<td style="text-align: left;">750:Blue</td>
+<td style="text-align: right;">-1.0304049</td>
+<td style="text-align: right;">0.0478239</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red_500</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1.1473181</td>
+<td style="text-align: right;">0.0007702</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red_500</td>
+<td style="text-align: left;">1000:Blue</td>
+<td style="text-align: right;">0.9725935</td>
+<td style="text-align: right;">0.0485919</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Red_750</td>
+<td style="text-align: left;">Green</td>
+<td style="text-align: right;">1.0207696</td>
+<td style="text-align: right;">0.0013734</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Red_750</td>
+<td style="text-align: left;">1000:Blue</td>
+<td style="text-align: right;">1.0304049</td>
+<td style="text-align: right;">0.0478239</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

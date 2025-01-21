@@ -1,0 +1,192 @@
+---
+title: "Supplementary materials: Single stressor data analysis for performance of diploids and triploids"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+editor: source
+editor_options:
+  chunk_output_type: console
+
+---
+
+This document presents the analysis of growth, oxygen consumption, and survival data collected from laboratory experiments that held diploid, chemically induced triploid, and mated triploid C. gigas under 5 levels of temperature, pH, and, disolved oxygen. These 3 experiments were performed sequentially.<Br><Br>
+
+
+## Packages
+Several packages are used to analyse this data. To see these click "show code"
+
+```{r, results='hide', warnings = 'hide', output = FALSE}
+library(MASS)
+library(tidyverse)
+library(here)
+library(survival)
+library(ggfortify)
+library(ggsurvfit)
+library(survminer)
+library(gridExtra)
+library(frailtyEM)
+library(lme4)
+library(emmeans)
+library(nlme)
+library(report)
+library(gridExtra)
+library(kableExtra)
+library(coxme)
+library(car)
+```
+
+# Growth analyses
+
+High mortality occurred in the pH experiment, thus we did not assess differences in individual growth rates due to the potential for size selective mortality to impact results. We only examine if a difference in mean mass and shell height of each pliody group in each  between the start and the end of each experiment.
+
+Read in the data
+
+```{r}
+sizedat_temp <- read.csv(here("Data", "Temperature", "Size_Temperature.csv"))
+sizedat_temp <- sizedat_temp %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time", "Tag.colour", "Tag.num"), as.factor)) 
+
+sizedat_DO <- read.csv(here("Data", "DO", "DO_SIZE_DATA.csv"))
+
+sizedat_DO <- sizedat_DO %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time"), as.factor)) %>% 
+  mutate(across(c("Mass", "Shell.Height"), as.numeric))
+
+pHsizedat <- read.csv(here("Data", "pH", "pH_sizedata.csv")) %>% 
+  mutate_at(c("Tank", "Treatment", "Ploidy", "Time.point"), as.factor) %>% 
+  filter(Ploidy != "Blank")
+
+```
+
+In order to determine if differences in size exiisted between ploidies we compared the size of individuals at the start of each experiment across ploidies and treatments. 
+
+
+
+
+## Temperature experiment
+
+### Summary of the data 
+
+@fig-temp_height and @fig-temp_mass show the size of individuals (Shell height and mass) at the start and end of the temperature experiment.
+
+```{r, echo=FALSE}
+#| label: fig-temp_height
+#| fig-cap: "Shell height of each ploidy group at the start and end of the experiment"
+#| warning: false
+sizedat_temp %>% ggplot(aes(x=Ploidy, y = Shell.Height, fill = Time))+geom_violin()+
+    xlab("Ploidy")+ylab("Shell height (mm)")+theme_bw()+
+  scale_fill_manual(values = c("red", "blue")) +
+    facet_wrap(~Treatment)
+```
+
+```{r, echo=FALSE}
+#| label: fig-temp_mass
+#| fig-cap: "Mass of each ploidy group at the start and end of the experiment"
+#| warning: false
+sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_violin()+
+  xlab("Ploidy")+ylab("Mass (g)")+theme_bw()+
+  scale_fill_manual(values = c("red", "blue"), breaks = unique(sizedat_temp$Time), labels = c("Start", "End"))+
+  facet_wrap(~Treatment)
+```
+
+```{r}
+#| label: tbl-temp_data_summary
+#| tbl-cap: Summary of size data from the temperature experiments. 3M = mated triploid, 2M = diploid, 3C = chemically induced triploid.
+#| warning: false
+
+kable(sizedat_temp %>% group_by(Ploidy, Treatment, Time) %>% summarise("Mean mass (g)" = mean(Mass), "SEM mass" = (sd(Mass)/sqrt(n())),
+                                                                 "Mean shell height (mm)" = mean(Shell.Height), "SEM shell height" = (sd(Shell.Height)/sqrt(n()))))
+```
+
+### Statistical analysis of the data
+As we observed a smaller shell height at the conclusion of the experiment, likley due to parts of the shell being shipped off during handling, we assess growth based on changes in mass over the course of the experiment.s <Br>
+
+We first inspected the data for normality (@fig-hist_temp_mass) and as it did not meet the assumptions we log transformed the data which improved normality (@fig-hist_temp_mass_logged)
+
+```{r, echo=FALSE}
+#| label: fig-hist_temp_mass
+#| fig-cap: "Distribution of size data"
+#| warning: false
+hist((sizedat_temp$Mass))
+```
+
+```{r, echo=FALSE}
+#| label: fig-hist_temp_mass_logged
+#| fig-cap: "Distribution of log transformed size data"
+#| warning: false
+hist(log(sizedat_temp$Mass))
+```
+
+As all individuals had been growing in a common environment prior to the start of the experiment we first compared the size of individuals at the start of the experiment using a linear model that included tank as a random factor. <Br>
+
+This model indicated that there was a significant ploidy treatment interaction effect (@tbl-anova_mass_at_start_temp). A difference in mean mass across ploidies existed, diploids were the smallest and mated triploids were largest (@fig-temp_mass; @tbl-temp_data_summary). The interaction was explained by the mean mass of induced triploids differing significantly between the 22.5 and 7.5 °C treatments. ***Therefore we did not simply compare the size of individuals at the end of the experiment for each ploidy across temperature treatments.*** <Br>
+
+```{r}
+massgrowthlm_temp <- sizedat_temp %>% filter(Time == "1_start") %>% 
+  lm(log(Mass)~Ploidy*Treatment, data=.)
+mass_start_temp.aov <- aov(massgrowthlm_temp)
+```
+
+```{r}
+#| label: tbl-anova_mass_at_start_temp
+#| tbl-cap: Results of the linear model comparing the size of individuals at the start of the temperature experiment
+#| warning: false
+
+kable(anova(massgrowthlm_temp), digits = 3)
+```
+
+Because of differences in the size of individuals between ploidies at the start of the experiment, and differences in the size of induced triploids between tanks we evaluated growth of each ploidy group using different linear mixed models for each ploidy group. These linear mixed models included experimental timepoint (start of experiment vs end of experiment) and treatment as fixed effects, and tank as a random effect.
+
+***In diploids***, the linear mixed model did not indicate that there was a significant time treatment interaction, or main effect of treatment. We did, however, observe a significant main effect of time (@tbl-lme_mass_dips_temp). This main effect indicated that diploids were significantly heavier at the end of the end of the experiment than at the beiging which indicated growth in all tanks (@fig-temp_mass).
+
+```{r}
+massgrowthlme_temp_dips <- sizedat_temp %>% filter(Ploidy == "2M") %>% 
+  lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
+```
+
+```{r}
+#| label: tbl-lme_mass_dips_temp
+#| tbl-cap: ANOVA table results of the linear model comparing the size of diploids throughout the temperature experiment
+#| warning: false
+
+kable(anova(massgrowthlme_temp_dips), digits = 3)
+```
+
+
+<Br><Br>
+***In induced triploids*** we observed a significant main effect of time, indicating that individuals grew over the course of the experiment (@tbl-lme_mass_dips_temp_3C). We did not, however, observe a main effect of treatment or time*treatment interaction effects. 
+
+```{r}
+massgrowthlme_temp_3C <- sizedat_temp %>% filter(Ploidy == "3C") %>% 
+  lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
+```
+
+
+```{r}
+#| label: tbl-lme_mass_dips_temp_3C
+#| tbl-cap: ANOVA table results of the linear model comparing the size of induced triploids throughout the temperature experiment
+#| warning: false
+
+kable(anova(massgrowthlme_temp_3C), digits = 3)
+```
+<Br><Br>
+Finally mated triploids
+***In mated triploids*** we observed a significant main effect of time, but no interaction effects or treatment main effects (@tbl-lme_mass_dips_temp_3M). 
+
+```{r}
+massgrowthlme_temp_3M <- sizedat_temp %>% filter(Ploidy == "3M") %>% 
+  lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
+```
+
+
+```{r}
+#| label: tbl-lme_mass_dips_temp_3M
+#| tbl-cap: ANOVA table results of the linear model comparing the size of mated triploids throughout the temperature experiment
+#| warning: false
+
+kable(anova(massgrowthlme_temp_3M), digits = 3)
+```
+
+<Br>
+**INDIVIDUALS WEIGHED MORE AT THE CONCLUSION OF THE TEMPERATURE EXPERIMENT, BUT NO DIFFERENCES IN SIZE WERE OBSERVED BETWEEN TREATMENTS AT THE END OF THE EXPERIMENT.** Individuals from all ploidies grew over the course of the experiment in all temperature treatments. The lack of interaction effect and time for each ploidy group indicates that regardless of the temperature treatment no detectable differences in mass at the conclusion of the experiment were observed within ploidies. 

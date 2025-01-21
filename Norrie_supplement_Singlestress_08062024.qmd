@@ -1,0 +1,152 @@
+---
+title: "Supplementary materials: Single stressor data analysis for performance of diploids and triploids"
+format:
+  html:
+    code-fold: true
+    code-summary: "Show the code"
+editor: source
+editor_options:
+  chunk_output_type: console
+
+---
+
+This document presents the analysis of growth, oxygen consumption, and survival data collected from laboratory experiments that held diploid, chemically induced triploid, and mated triploid C. gigas under 5 levels of temperature, pH, and, disolved oxygen. These 3 experiments were performed sequentially.<Br><Br>
+
+
+## Packages
+Several packages are used to analyse this data. To see these click "show code"
+
+```{r, results='hide', warnings = 'hide', output = FALSE}
+library(MASS)
+library(tidyverse)
+library(here)
+library(survival)
+library(ggfortify)
+library(ggsurvfit)
+library(survminer)
+library(gridExtra)
+library(frailtyEM)
+library(lme4)
+library(emmeans)
+library(nlme)
+library(report)
+library(gridExtra)
+library(kableExtra)
+library(coxme)
+library(car)
+```
+
+# Growth analyses
+
+High mortality occurred in the pH experiment, thus we did not assess differences in individual growth rates due to the potential for size selective mortality to impact results. We only examine if a difference in mean mass and shell height of each pliody group in each  between the start and the end of each experiment.<Br>
+
+Read in the data
+
+```{r}
+sizedat_temp <- read.csv(here("Data", "Temperature", "Size_Temperature.csv"))
+sizedat_temp <- sizedat_temp %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time", "Tag.colour", "Tag.num"), as.factor)) 
+
+sizedat_DO <- read.csv(here("Data", "DO", "DO_SIZE_DATA.csv"))
+
+sizedat_DO <- sizedat_DO %>% 
+  mutate(across(c("Treatment","Tank", "Ploidy", "Time"), as.factor)) %>% 
+  mutate(across(c("Mass", "Shell.Height"), as.numeric))
+
+pHsizedat <- read.csv(here("Data", "pH", "pH_sizedata.csv")) %>% 
+  mutate_at(c("Tank", "Treatment", "Ploidy", "Time.point"), as.factor) %>% 
+  filter(Ploidy != "Blank")
+
+```
+
+#### Differences in size at the start of each experiment
+
+As all individuals had been growing in a common environment prior to the start of the experiment we first compared the size of individuals at the start of the experiment using a linear model that included plolidy and treatment. We ran one model for each of the experiments. This allowed us to examine the effect of ploidy on growth in a common garden environment and determine the most appropriate statistical approach. <Br>
+
+<B>At the start of the temperature experiment </B> there were significant significant ploidy and treatment main effects (@tbl-anova_mass_at_start_temp). This indicates that individual size differedc between treatments at the start of the experiment. 
+
+```{r}
+massgrowthlm_temp_experiment_start <- sizedat_temp %>% filter(Time == "1_start") %>% 
+  lm(log(Mass)~Ploidy*Treatment, data=.)
+mass_start_temp.aov <- aov(massgrowthlm_temp_experiment_start)
+```
+
+```{r}
+#| label: tbl-anova_mass_at_start_temp
+#| tbl-cap: Results of the linear model comparing the size of individuals at the start of the temperature experiment
+#| warning: false
+
+kable(anova(massgrowthlm_temp_experiment_start), digits = 3)
+```
+
+Post hoc comparisons revealed significant differences existed between all ploidy groups (@tbl-pairwise_temp_exptstart_ploidy), and between individuals in the 7.5 °C treatment which were smaller than those from the 12.5 and 22.5 C treatment. 
+
+```{r, warning = FALSE, echo - FALSE}
+emmeans_lm_temp_expt_start_ploidy <- emmeans(massgrowthlm_temp_experiment_start, ~ Ploidy)
+emmeans_lm_temp_expt_start_contrasts_ploidy <- pairs(emmeans_lm_temp_expt_start_ploidy, simple = "Ploidy", adjust = "Tukey")
+emmeans_lm_temp_expt_start_contrasts_ploidy_df <-  as.data.frame(emmeans_lm_temp_expt_start_contrasts_ploidy)
+#sig_DO_resp_contrasts_noHS_df <- temp_resp_contrasts_noHS_df %>% filter(p.value <=0.05)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-pairwise_temp_exptstart_ploidy
+#| tbl-cap: "Pairwise contrasts of ploidy from the linear model comparing the size of individuals at the start of the tempeature experiment"
+#| warning: false
+
+kable(emmeans_lm_temp_expt_start_contrasts_ploidy_df)
+```
+
+
+```{r, warning = FALSE}
+emmeans_lm_temp_expt_start_trt <- emmeans(massgrowthlm_temp_experiment_start, ~ Treatment)
+emmeans_lm_temp_expt_start_contrasts_trt <- pairs(emmeans_lm_temp_expt_start_trt, simple = "Treatment", adjust = "Tukey")
+emmeans_lm_temp_expt_start_contrasts_trt_df <-  as.data.frame(emmeans_lm_temp_expt_start_contrasts_trt)
+emmeans_lm_temp_expt_start_contrasts_trt_df <- emmeans_lm_temp_expt_start_contrasts_trt_df %>% filter(p.value <=0.05)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-pairwise_temp_exptstart_trt
+#| tbl-cap: "Pairwise contrasts of treatment from the linear model comparing the size of individuals at the start of the tempeature experiment"
+#| warning: false
+
+kable(emmeans_lm_temp_expt_start_contrasts_trt_df)
+```
+
+<B>At the start of the dissolved oxygen experiment</B> significant treatment*ploidy interaction effects were observed (@tbl-anova_mass_at_start_DO). This indicated that size was not consistent across treatments or ploidies at teh start of the experiment. 
+
+```{r}
+massgrowthlm_DO_experiment_start <- sizedat_DO %>% filter(Time == "1_start") %>% 
+  lm(log(Mass)~Ploidy*Treatment, data=.)
+mass_start_DO.aov <- aov(massgrowthlm_DO_experiment_start)
+```
+
+```{r}
+#| label: tbl-anova_mass_at_start_DO
+#| tbl-cap: Results of the linear model comparing the size of individuals at the start of the dissolved oxygen experiment
+#| warning: false
+
+kable(anova(massgrowthlm_DO_experiment_start), digits = 3)
+```
+
+Post hoc comparisons revealed that in all treatments mated triploids were larger than induced triploids and diploids. No differences in sizes existed between diploids and mated triploids (@tbl-pairwise_mass_at_start_DO). No differences in size existed between 
+
+```{r, warning = FALSE}
+emmeans_lm_DO_expt_start_trt <- emmeans(massgrowthlm_DO_experiment_start, ~ Treatment*Ploidy)
+emmeans_lm_DO_expt_start_contrasts_trt <- pairs(emmeans_lm_DO_expt_start_trt, simple = "Ploidy", adjust = "Tukey")
+emmeans_lm_DO_expt_start_contrasts_trt_df <-  as.data.frame(emmeans_lm_DO_expt_start_contrasts_trt)
+
+
+
+#emmeans_lm_DO_expt_start_contrasts_trt_df <- emmeans_lm_DO_expt_start_contrasts_trt_df %>% filter(p.value <=0.05)
+```
+
+
+```{r, echo = FALSE}
+#| label: tbl-pairwise_mass_at_start_DO
+#| tbl-cap: Results of the pairwise comparisons of size of individuals at the start of the dissolved oxygen experiment
+#| warning: false
+
+kable(emmeans_lm_DO_expt_start_contrasts_trt_df)
+```
+
+<B>At the start of the pCO2 experiment</B> 

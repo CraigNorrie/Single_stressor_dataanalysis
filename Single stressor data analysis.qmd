@@ -11,7 +11,7 @@ editor_options:
 ---
 
 Analysis of growth, oxygen consumption, and survival data collected from laboratory experiments that held diploid and triploid C. gigas under 5 levels of temperature, pH, and, disolved oxygen.<Br><Br>
-Individuals were held for a period of 4 weeks under these conditions. 
+Individuals were held for a period of 4 weeks under these conditions. This is a supplementary file to Norrie et al. (in prep) single stressor diploid and triploid research mansucript. This markdown file anlysed differences in growth, respiration, and mortality 
 
 ## Packages
 Several packages are used to analyse this data. To see these click "show code"
@@ -32,7 +32,10 @@ library(nlme)
 library(report)
 library(gridExtra)
 library(kableExtra)
+library(coxme)
+library(car)
 ```
+
 
 # Growth analyses
 
@@ -67,14 +70,15 @@ sizedat_temp %>% ggplot(aes(x=Ploidy, y = Shell.Height, fill = Time))+geom_boxpl
 #| label: fig-temp_mass
 #| fig-cap: "Mass of each ploidy group at the start and end of the experiment"
 #| warning: false
-sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_boxplot()+
+sizedat_temp %>% ggplot(aes(x=Ploidy, y = Mass, fill = Time))+geom_violin()+
   xlab("Ploidy")+ylab("Mass (g)")+theme_bw(base_size = 20)+
   scale_fill_manual(values = c("red", "blue"), breaks = unique(sizedat_temp$Time), labels = c("Start", "End")) +
   scale_x_discrete(labels = c("Diploids", "Induced Triploids", "Mated Triploids")) +
   facet_wrap(~Treatment)
 ```
 
-The smaller shell height at the conclusion of the experiment was likley due to parts of the shell being chipped off or inaccuracies in measurements. <Br>
+The smaller shell height at the conclusion of the experiment was likely due to parts of the shell being chipped off or inaccuracies in measurements. Thus we do not include measures of shell height growth in the manuscript <Br>
+
 We observe the mean mass increase over the course of the experiment in all (@fig-temp_mass) ploidies held at 7.5 °C, 12.5 °C, and 17.5 °C but minimal changes in mass in the 22.5 °C and 27.5 °C treatments. Although this was not statistcally significant. 
 
 ```{r}
@@ -103,9 +107,12 @@ hist((sizedat_temp$Mass))
 hist(log(sizedat_temp$Mass))
 ```
 
-As all individuals had been growing in a common environment prior to the start of the experiment we compared the size of individuals at the start of the experiment using a linear model. <Br>
-This model indicated that there was a significant difference in the mass of induced triploids in the 22.5 and 7.5 °C treatments. This means that we couldn't just compare the size of individuals at the end of the experiment. <Br>
-Differences in mean size of each ploidy existed at the start of the experiment. Diploids were the smallest and mated triploids were largest (@fig-hist_temp_mass_logged).This is what explains the signifcant treatment:ploidy interaction. 
+As all individuals had been growing in a common environment prior to the start of the experiment we first compared the size of individuals at the start of the experiment using a linear model. <Br>
+
+This model indicated that there was a significant difference in the mean mass of induced triploids between the 22.5 and 7.5 °C treatments. Therefore we did not simply compare the size of individuals at the end of the experiment for each ploidy across temperature treatments. <Br>
+
+Differences in mean size of each ploidy existed at the start of the experiment. Diploids were the smallest and mated triploids were largest (@fig-temp_mass).This is what explains the significant treatment:ploidy interaction. <Br>
+
 
 ```{r}
 massgrowthlm_temp <- sizedat_temp %>% filter(Time == "1_start") %>% 
@@ -121,8 +128,10 @@ mass_start_temp.aov <- aov(massgrowthlm_temp)
 kable(anova(massgrowthlm_temp), digits = 3)
 ```
 
-We focused on changes in mass rather than shell height because of the potential mis-measureing and chipping that resulted in some shrinkage in the shell height over the course of the experiment. Using a linear mixed model that included tank as a random factor we compared the mean size of individuals from each ploidy group individual for each of the treatments at the start and the end of the experiment.<Br><Br>
-First we compared diploids
+We focused on changes in mass rather than shell height because of the potential mis-measureing and chipping that resulted in some shrinkage in the shell height over the course of the experiment. Using a linear mixed model that included tank as a random factor we compared the mean size of individuals from each ploidy group individually for each of the treatments at the start and the end of the experiment.<Br><Br>
+
+***In diploids***, the linear mixed model did not indicate that there was a significant time treatment interaction, or main effect of treatment. We did, however, observe a significant main effect of time (@tbl-lme_mass_dips_temp). This main effect indicated that diploids were significantly heavier at the end of the end of the experiment than at the beiging which indicated growth in all tanks (@fig-temp_mass).
+
 ```{r}
 massgrowthlme_temp_dips <- sizedat_temp %>% filter(Ploidy == "2M") %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
@@ -136,14 +145,15 @@ massgrowthlme_temp_dips <- sizedat_temp %>% filter(Ploidy == "2M") %>%
 kable(anova(massgrowthlme_temp_dips), digits = 3)
 ```
 
-No significant interaction effects were observed and no main effects of treatment were observed. There was a significant main effect of time (@tbl-lme_mass_dips_temp). The mean mass was larger at the conclusion of the experiment than at the start (@fig-temp_mass)
+
 <Br><Br>
-Followed by induced triploids
+***In induced triploids*** we observed a significant main effect of time, indicating that individuals grew over the course of the experiment (@tbl-lme_mass_dips_temp_3C). We did not, however, observe a main effect of treatment or time*treatment interaction effects. 
+
 ```{r}
 massgrowthlme_temp_3C <- sizedat_temp %>% filter(Ploidy == "3C") %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
 ```
-Again there was a significant time main effect but nosignificant treatment or interaction effects (lme_mass_dips_temp_3C)
+
 
 ```{r}
 #| label: tbl-lme_mass_dips_temp_3C
@@ -154,11 +164,13 @@ kable(anova(massgrowthlme_temp_3C), digits = 3)
 ```
 <Br><Br>
 Finally mated triploids
+***In mated triploids*** we observed a significant main effect of time, but no interaction effects or treatment main effects (@lme_mass_dips_temp_3M). 
+
 ```{r}
 massgrowthlme_temp_3M <- sizedat_temp %>% filter(Ploidy == "3M") %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank.
 ```
-Again there was a significant time main effect but no significant treatment or interaction effects (lme_mass_dips_temp_3M).
+
 
 ```{r}
 #| label: tbl-lme_mass_dips_temp_3M
@@ -169,7 +181,7 @@ kable(anova(massgrowthlme_temp_3M), digits = 3)
 ```
 
 <Br>
-**INDIVIDUALS WEIGHED MORE AT THE CONCLUSION OF THE TEMPERATURE EXPERIMENT, BUT NO DIFFERENCES IN SIZE WERE OBSERVED BETWEEN TREATMENTS AT THE END OF THE EXPERIMENT.**
+**INDIVIDUALS WEIGHED MORE AT THE CONCLUSION OF THE TEMPERATURE EXPERIMENT, BUT NO DIFFERENCES IN SIZE WERE OBSERVED BETWEEN TREATMENTS AT THE END OF THE EXPERIMENT.** Individuals from all ploidies grew over the course of the experiment in all temperature treatments. The lack of interaction effect and time for each ploidy group indicates that regardless of the temperature treatment no detectable differences in mass at the conclusion of the experiment were observed within ploidies. 
 
 ## Disolved oxygen experiment
 
@@ -185,7 +197,7 @@ sizedat_DO <- sizedat_DO %>%
 
 ### Visualise the data. 
 
-fig-do_mass and fig-do_height show the size of individuals at the start and conclusion of the experiment.
+@fig-do_mass and @fig-do_height show the size of individuals at the start and conclusion of the experiment.
 
 ```{r, echo=FALSE}
 #| label: fig-do_mass
@@ -212,7 +224,7 @@ sizedat_DO %>% filter(Treatment != 100) %>%
 
 ### Startistical analysis
 
-Again we copm[ared the mean size of each ploidy seperatley at the start and end of each experiment. We did not conmpare across ploidies as there are inherent differences in the size of each ploidy. Mated triploids were larger than induced triploids and diploids at the start of this experiment. There was no difference in the size of diploids and mated triploids throughout this experiment. <Br>
+Again we copmared the mean size of each ploidy seperatley at the start and end of each experiment. We did not conmpare across ploidies as there are inherent differences in the size and growth of each ploidy. Mated triploids were larger than induced triploids and diploids at the start of this experiment. There was no difference in the size of diploids and mated triploids throughout this experiment. <Br>
 We focused on mass as it provided a more accurate measurement and was not as influenced by small chips of shell being removed. 
 <Br>
 We first visualised the distribution of the data (@fig-do_height_distributrion). A log transformation of the data improved normality (@fig-do_mass_distributrion_log), thus we performed statistical analyses on log transformed data. 
@@ -232,15 +244,16 @@ hist(sizedat_DO$Mass)
 hist(log(sizedat_DO$Mass))
 ```
 <Br>
-Again using a linear mixed model that included tank as a random factor we compared sizes for each ploidy seperatley over the course of this experiment. 
+As in the temperature comparisons we used a linear mixed model that included tank as a random factor we compared sizes for each ploidy seperatley over the course of this experiment. 
 <Br><Br>
-Started with diploids
-<Br>
+
+***In diploids*** we did not observe any significant time*treatment interaction effects or main effects (@tbl-lme_mass_DO_2M). This indicated that no growth occured over the course of the experiment under any DO level. 
+
 ```{r}
 massgrowthlme_DO_2M <- sizedat_DO %>% filter(Ploidy == "2M") %>% filter(Treatment != 100) %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
 ```
-No significant main or interaction effects were observed in diploids (@tbl-lme_mass_DO_2M). No growth was observed and no differences in mass between treatments existedf at any point during this experiment.
+
 
 ```{r}
 #| label: tbl-lme_mass_DO_2M
@@ -250,7 +263,7 @@ No significant main or interaction effects were observed in diploids (@tbl-lme_m
 kable(anova(massgrowthlme_DO_2M), digits = 3)
 ```
 <Br><Br>
-Induced triploids showed the same pattern. No differences in size were observed during this experiment (@tbl-lme_mass_DO_3C). 
+***In induced triploids*** we did not observe any significant time*treatment interaction effects or main effects (@tbl-lme_mass_DO_3C). This indicates that no growth occured over the course of this experiment for induced triploids held under any disolved oxygen level. This uggested that no growth occured in any of the experimental treatments in induced triploids. 
 ```{r}
 massgrowthlme_DO_3C <- sizedat_DO %>% filter(Ploidy == "3C") %>% filter(Treatment != 100) %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
@@ -265,7 +278,8 @@ massgrowthlme_DO_3C <- sizedat_DO %>% filter(Ploidy == "3C") %>% filter(Treatmen
 kable(anova(massgrowthlme_DO_3C), digits = 3)
 ```
 <Br><Br>
-Tiploids however showed significant differences in mass between the start and the end of the experiment. Triploids grew over the course of the experiment. This was shown by the significant main effect of time (). No main effect of treatment or time*treatment interaction effects were observed (). 
+***In mated triploids*** we ***did*** observe a significant difference in mass between the start and end of the experiment (@tbl-lme_mass_DO_3M). We did not observe a significant time*treatment interaction, or main effect of treatment. However, we did observe a significant main effect of time. This indicates that under all disolved oxygen treatments mated triploids significantly increased in mass. 
+
 ```{r}
 massgrowthlme_DO_3M <- sizedat_DO %>% filter(Ploidy == "3M") %>% filter(Treatment != 100) %>% 
   lme(log(Mass)~Time*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
@@ -278,7 +292,7 @@ massgrowthlme_DO_3M <- sizedat_DO %>% filter(Ploidy == "3M") %>% filter(Treatmen
 
 kable(anova(massgrowthlme_DO_3M), digits = 3)
 ```
-**THERE WAS NO CHANGE IN MASS OVER THE COURSE OF THIS EXPERIMENT IN DIPLOIDS OR INDUCED TRIPLOIDS, HOWEVER MATED TRIPLOIDS DID SHOW A DIFFERENCE IN SIZE OVER TEH COURSE OF THIS EXPERIMENT. THERE WAS NO EFFECT OF DISOCLVED OXYGEN LEVEL. **
+**THERE WAS NO CHANGE IN MASS OVER THE COURSE OF THIS EXPERIMENT IN DIPLOIDS OR INDUCED TRIPLOIDS, HOWEVER MATED TRIPLOIDS DID SHOW A DIFFERENCE IN SIZE OVER THE COURSE OF THIS EXPERIMENT. THERE WAS NO EFFECT OF DISOCLVED OXYGEN LEVEL. ** This suggetses that growth of mated triploids can occur under a range of dissolved oxygen levels where growth in iinduced triploids and diploids does not occur.
 
 ## pCO2 experiment
 
@@ -342,8 +356,10 @@ hist(log(pHsizedat$Mass))
 
 As in the previous analyses I am going to compare the two time points for each of the ploidies using a linear mixed modelling approach. Tank is included as a random factor.<Br>
 <Br>
-Starting with diploids. <Br>
-No differences in mass were observed in size in diploids duering the pH experiment. No interaction effects or main effects of time or treatment were observed (@lme_mass_ph_2M)
+***in all ploidy groups*** we did not observe significant time*treatment interactions, main effects of time, or main effects of treatment (@tbl-lme_mass_ph_2M, @tbl-lme_mass_ph_3C, @tbl-lme_mass_ph_3M).<Br>
+<Br>
+Diploids
+<Br>
 ```{r}
 massgrowthlme_pH_2M <- pHsizedat %>% filter(Ploidy == "Diploid") %>% 
   lme(log(Mass)~Time.point*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
@@ -357,10 +373,8 @@ massgrowthlme_pH_2M <- pHsizedat %>% filter(Ploidy == "Diploid") %>%
 kable(anova(massgrowthlme_pH_2M), digits = 3)
 ```
 <Br>
-Induced Triploids
+Inducted triploids
 <Br>
-<Br>
-Similarly induced triploids did not show any impact of time or treatment on the mean size of individuals (@tbl-lme_mass_ph_3C)
 ```{r}
 massgrowthlme_pH_3C <- pHsizedat %>% filter(Ploidy == "Induced Triploid") %>% 
   lme(log(Mass)~Time.point*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
@@ -376,8 +390,6 @@ kable(anova(massgrowthlme_pH_3C), digits = 3)
 <Br>
 Mated Triploids
 <Br>
-<Br>
-Similarly mated triploids did not show any impact of time or treatment on the mean size of individuals (@tbl-lme_mass_ph_3M)
 ```{r}
 massgrowthlme_pH_3M <- pHsizedat %>% filter(Ploidy == "Mated Triploid") %>% 
   lme(log(Mass)~Time.point*Treatment, random = ~1 | Tank, data=.) #This model includes a random effect of tank. 
@@ -460,6 +472,8 @@ hist(temp_resprates$mass_corected_rate)
 #| warning: false
 
 hist(sqrt((temp_resprates$mass_corected_rate+.001)))
+
+
 ```
 
 The results of the linear mixed model indicated that there was a marginally significant interaction effect and significant main effects of ploidy and treatment (@tbl-lme_temp_resorates_noHS). 
@@ -467,6 +481,7 @@ The results of the linear mixed model indicated that there was a marginally sign
 ```{r}
 lm_temp_resp_noHS <- temp_resprates %>% filter(HS == "NOHS") %>% filter(mass_corected_rate != "NA") %>% 
   lme(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, random = ~ 1|Tank, data=., method = "ML")
+
 ```
 
 ```{r, echo=FALSE}
@@ -480,6 +495,8 @@ kable(anova(lm_temp_resp_noHS), digits = 3)
 We then performed post hoc analyses on this to determine significant parirwise contrasts. These comparisons were made using the emmeans package. 
 ```{r}
 emmeans_lm_temp_resp <- emmeans(lm_temp_resp_noHS, ~ Ploidy*Treatment)
+pairs(emmeans_lm_temp_resp, simple = "Treatment")
+pairs(emmeans_lm_temp_resp, simple = "Ploidy")
 temp_resp_contrasts_noHS <- pairs(emmeans_lm_temp_resp)
 temp_resp_contrasts_noHS_df <-  as.data.frame(temp_resp_contrasts_noHS)
 sig_temp_resp_contrasts_noHS_df <- temp_resp_contrasts_noHS_df %>% filter(p.value <=0.05)
@@ -511,15 +528,44 @@ lm_temp_resp_HS <- temp_resprates %>% filter(HS == "HS") %>% filter(mass_corecte
 kable(anova(lm_temp_resp_HS), digits = 3)
 ```
 
-Finally we compared the respiration rates in the heat shocked individuals and the non heat shocked individuals 
-THIS NEEDS TO BE COMPLETED
+We then examined if there was a significant difference in oxygen consumption when the temperature at which repirometry was conducted was increased to 32.5 °C. Individuals held at 7.5 °C over the course of the experiment did not exhibit significant differences in oxygen consumption when respiprometry was conducted at 32.5 °C (TABLE), individuals held at 17.5 °C from all ploidies significantly increased their oxygen consumption at 32.5 °C, and individuals from  27..5 °C did not significantly increase oxygen consumption because oxygen consumption was generally higher. When the HS and non HS individuals were combined, however, there was a difference in oxygen consumption between diploids (@tbl-ANOVA_HS_NOHS_7,@tbl-ANOVA_HS_NOHS_17,@tbl-ANOVA_HS_NOHS_27)
 
 ```{r}
-# lm_temp_resp <- temp_resprates %>% filter(mass_corected_rate != "NA") %>% filter(Ploidy == "3m") %>% 
-#   lme(sqrt(mass_corected_rate+.001)~HS*Treatment, random = ~ 1|Tank, data=., method = "ML")
+
+lm_temp_resp_HS_NOHS_7.5 <- temp_resprates %>% filter(Treatment == "7.5") %>% filter(mass_corected_rate != "NA") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+lm_temp_resp_HS_NOHS_17.5 <- temp_resprates %>% filter(Treatment == "17.5") %>% filter(mass_corected_rate != "NA") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+lm_temp_resp_HS_NOHS_27.5 <- temp_resprates %>% filter(Treatment == "27.5") %>% filter(mass_corected_rate != "NA") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+
+#Check pairwise diffs for ploidies at 27.5
+pairs(emmeans(lm_temp_resp_HS_NOHS_27.5, ~ Ploidy))
 ```
 
+```{r, echo=FALSE}
+#| label: tbl-ANOVA_HS_NOHS_7
+#| tbl-cap: "ANOVA results of the linear model examining differences in oxygen consumption between heat shocked and non heat shocked individuals at 7.5 °C"
+#| warning: false
 
+kable(anova(lm_temp_resp_HS_NOHS_7.5), digits = 3)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-ANOVA_HS_NOHS_17
+#| tbl-cap: "ANOVA results of the linear model examining differences in oxygen consumption between heat shocked and non heat shocked individuals at 17.5 °C"
+#| warning: false
+
+kable(anova(lm_temp_resp_HS_NOHS_17.5), digits = 3)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-ANOVA_HS_NOHS_27
+#| tbl-cap: "ANOVA results of the linear model examining differences in oxygen consumption between heat shocked and non heat shocked individuals at 27.5 °C"
+#| warning: false
+
+kable(anova(lm_temp_resp_HS_NOHS_27.5), digits = 3)
+```
 ***NO DIFFERENCES IN OXYGEN CONSUMPTION EXISTED BETWEEN PLOIDIES AT ANY TEMPERATURE. DIPLOIDS INCREASED OXYGEN CONSUMPTION AT HIGHER TEMPERATURES. TRIPLOIDS DID NOT.THERE WAS NO DIFFERENTIAL IMPACT OF HEAT SHOCK ON INDIVIDUALS. ***
 
 ## Disolved oxygen experiment
@@ -588,16 +634,12 @@ hist(DO_resprates$mass_corected_rate)
 hist(sqrt(DO_resprates$mass_corected_rate+.0001))
 ```
 
-```{r}
-lm_DO_resp_noHS <- DO_resprates %>% filter(HS == "NOHS") %>% filter(mass_corected_rate != "NA") %>% 
-  lme(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, random = ~ 1|Tank, data=., method = "ML")
-```
-
 We then constructed a linear mixed model to examine differences between ploidies and treatments. We observed a significant main effect of ploidy (@tbl-lme_DO_resorates_noHS) but no main effects of treatment and no ploidy treatment x ploidy interaction effect. 
 
 
 ```{r}
 lm_DO_resp_noHS <- DO_resprates %>% filter(HS == "NOHS") %>% filter(mass_corected_rate != "NA") %>% filter(Treatment != "100") %>%
+  filter(mass_corected_rate<10) %>% 
   lme(sqrt(mass_corected_rate+.001)~Ploidy*Treatment, random = ~ 1|Tank, data=., method = "ML")
 ```
 
@@ -617,7 +659,6 @@ DO_resp_contrasts_noHS <- pairs(emmeans_lm_DO_resp)
 DO_resp_contrasts_noHS_df <-  as.data.frame(DO_resp_contrasts_noHS)
 #sig_DO_resp_contrasts_noHS_df <- temp_resp_contrasts_noHS_df %>% filter(p.value <=0.05)
 ```
-
 
 ```{r, echo=FALSE}
 #| label: tbl-pairwise_DO_resp_nohs
@@ -640,6 +681,44 @@ lm_DO_resp_HS <- DO_resprates %>% filter(HS == "HS") %>% filter(mass_corected_ra
 #| warning: false
 
 kable(anova(lm_DO_resp_HS))
+```
+
+We also examined if differences in oxygen consumption existed between individuals that had oxygen consumption measured at 17.5 °C and those that were exposed to 32.5 °C temperatures for an hour before and during respirometry. We used a linear mixed model with tank included as a random factor to assess this for each temperature treatment. At each temperature there were significant differences in oxygen consumption when respirometry was condiced at 17.5°C and 27.5 °C (@tbl-lm_DO_resp_HS_NOHS_20, @tbl-lm_DO_resp_HS_NOHS_60, tbl-lm_DO_resp_HS_NOHS_80)
+
+```{r}
+#20% DO
+lm_DO_resp_HS_NOHS_diffs_20 <- DO_resprates %>%  filter(mass_corected_rate != "NA") %>% filter(Treatment == "20") %>%
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+#60% DO
+lm_DO_resp_HS_NOHS_diffs_60 <- DO_resprates %>%  filter(mass_corected_rate != "NA") %>% filter(Treatment == "60") %>%
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+#80% DO
+lm_DO_resp_HS_NOHS_diffs_80 <- DO_resprates %>%  filter(mass_corected_rate != "NA") %>% filter(Treatment == "80") %>%
+  lme(sqrt(mass_corected_rate+.001)~Ploidy*HS, random = ~ 1|Tank, data=., method = "ML")
+```
+
+```{r, echo=FALSE}
+#| label: tbl-lm_DO_resp_HS_NOHS_20
+#| tbl-cap: "ANOVA table of oxygen consumption comparisons between heat shocked and non heat shocked individuals at 20% oxygen"
+#| warning: false
+
+kable(anova(lm_DO_resp_HS_NOHS_diffs_20))
+```
+
+```{r, echo=FALSE}
+#| label: tbl-lm_DO_resp_HS_NOHS_60
+#| tbl-cap: "ANOVA table of oxygen consumption comparisons between heat shocked and non heat shocked individuals at 60% oxygen"
+#| warning: false
+
+kable(anova(lm_DO_resp_HS_NOHS_diffs_60))
+```
+
+```{r, echo=FALSE}
+#| label: tbl-lm_DO_resp_HS_NOHS_80
+#| tbl-cap: "ANOVA table of oxygen consumption comparisons between heat shocked and non heat shocked individuals at 80% oxygen"
+#| warning: false
+
+kable(anova(lm_DO_resp_HS_NOHS_diffs_80))
 ```
 
 ***DIPLOIDS CONSUMED MORE OXYGEN THAN TRIPLOIDS UNDER ALL DO CONDITIONS AT NORMAL TEMPERATURES. AT HIGHT TEMPERATURES ALL GROUPS CONSUMED MORE OXYGEN, BUT THERE WAS NO DIFFERENCE BETWEEN PLOIDIES OR TREATMENTS***
@@ -679,13 +758,13 @@ pHrates_summary$SEM <- pHrates_summary$sd_pH_resprate/(sqrt(pHrates_summary$n))
 
 pHrates_summary$Treatment <- gsub("HS", "", pHrates_summary$Treatment)#Rmove the HS from the cells
 pHrates_summary$Treatment <- factor(pHrates_summary$Treatment, levels = c("CTRL", "250", "500", "750", "1000"))#Set the order of the facets #Order the x axis
-pHrates_summary %>% #filter(Treatment != "100") %>% #filter(HS == "NOHS") %>% 
+pHrates_summary %>% 
   ggplot(aes(x=Treatment, y= pH_mean_resprate, group = Colour, colour = Colour))+geom_line()+
   xlab("pH")+ylab("Mean oxygen consumption (µmol h-1 g-1)")+
   geom_errorbar(aes(ymin=pH_mean_resprate-SEM, ymax = pH_mean_resprate+SEM, width = 0.2))+theme_bw(base_size = 20)+
-  scale_color_manual(values = c("#CD950C", "#00688B", "#8B0A50"),   # Custom colors for each group
-                     breaks = c("Red", "Blue", "Green"),   # Names of your groups
-                     labels = c("Induced Triploids", "Diploids", "Mated Triploids" ))+   # Custom labels for each group
+  # scale_color_manual(values = c("#CD950C", "#00688B", "#8B0A50"),   # Custom colors for each group
+  #                    breaks = c("Red", "Blue", "Green"),   # Names of your groups
+  #                    labels = c("Induced Triploids", "Diploids", "Mated Triploids" ))+   # Custom labels for each group
   labs(color = "Ploidy")+ # Change the legend title to "Ploidy"
   facet_wrap(~HS, nrow = 2)
 ```
@@ -723,6 +802,15 @@ lm_pH_resp_HS <- pH_resprates %>% filter(HS == "HS") %>% filter(mass_corected_ra
 ```
 
 ```{r, echo=FALSE}
+#| label: tbl-lm_pH_resp_NOHS
+#| tbl-cap: "ANOVA table of results from individuals in pH experiment."
+#| warning: false
+
+kable(anova(lm_pH_resp_NOHS))
+```
+
+
+```{r, echo=FALSE}
 #| label: tbl-lm_pH_resp_HS
 #| tbl-cap: "ANOVA table of results from heat shocked individuals in pH experiment."
 #| warning: false
@@ -730,13 +818,28 @@ lm_pH_resp_HS <- pH_resprates %>% filter(HS == "HS") %>% filter(mass_corected_ra
 kable(anova(lm_pH_resp_HS))
 ```
 
-```{r, echo=FALSE}
-#| label: tbl-lm_pH_resp_NOHS
-#| tbl-cap: "ANOVA table of results from individuals in pH experiment."
-#| warning: false
 
-kable(anova(lm_pH_resp_NOHS))
+Finally, within pCO2 treatments we compared if there were differences in oxygen consumption between individuals that had oxygen consumption measured at 17.5 and 32.5 °C. There were no significant differences in the oxygen concumption of individuals at 17.5 and 32.5 °C across treatments. There was however much higher variation in oxygen consumption in individuals that were exposed to 32.5 °C water prior to 
+
+```{r}
+lm_pH_resp_HS_NOHS_ctrl <- pH_resprates %>% filter(Treatment == "CTRL") %>% 
+  filter(mass_corected_rate != "NA") %>% filter(Colour != "NO") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Colour*HS, random = ~ 1|Tank, data=., method = "ML")
+lm_pH_resp_HS_NOHS_500 <- pH_resprates %>% filter(Treatment == "500") %>% 
+  filter(mass_corected_rate != "NA") %>% filter(Colour != "NO") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Colour*HS, random = ~ 1|Tank, data=., method = "ML")
+lm_pH_resp_HS_NOHS_1000 <- pH_resprates %>% filter(Treatment == "1000") %>% 
+  filter(mass_corected_rate != "NA") %>% filter(Colour != "NO") %>% 
+  lme(sqrt(mass_corected_rate+.001)~Colour*HS, random = ~ 1|Tank, data=., method = "ML")
+#!000 was the only one with a significant differcne
+anova(lm_pH_resp_HS_NOHS_1000)
+pairs(emmeans(lm_pH_resp_HS_NOHS_1000, ~ Colour))
 ```
+
+```{r}
+
+```
+
 
 # Mortality/Survival
 
@@ -866,6 +969,16 @@ pooled_site_survplot_temp_pooled
 kable(survival_eventdat_temp %>% filter(Time <= 28) %>% group_by(Colour, Temp) %>% summarise(sum=sum(event)))
 ```
 
+Create a table of the moralities that includes SEM
+
+```{r}
+temp_survivors <- merge(temp_survivors, temp_tank_assignments)
+temp_survivors$mortrate <- (30-temp_survivors$Surv_29)/30*100
+kable(temp_survivors %>% select(Tank, Colour, Temp, mortrate) %>% group_by(Colour, Temp) %>% summarise(meanmort=mean(mortrate), semmortrate=sd(mortrate/(sqrt(30)))))
+```
+
+
+
 ## Disolved oxygen 
 
 Mortality was also low in the disolved oxygen experiment. 18 Mortalities were observed across all treatments and ploidies. This accounts for 1.3% mortality. Although the majority of moralities occured in the 20% oxygen level treatment (@tbl-mortalties_Do; @fig-mortalties_Do)
@@ -993,6 +1106,15 @@ longpooled_site_survplot_DO_pooled <- pooled_site_survplot_DO_pooled <- survival
 kable(survival_eventdat_DO %>% filter(Time <= 28) %>% group_by(Colour, DO) %>% summarise(sum=sum(event)))
 ```
 
+Add the SEM to the mortrates here
+
+
+```{r}
+DO_survivors <- merge(DO_survivors, DO_tank_assignments)
+DO_survivors$mortrate <- (30-DO_survivors$Surv_29)/30*100
+kable(DO_survivors %>% select(Tank, Colour, DO, mortrate) %>% group_by(Colour, DO) %>% summarise(meanmort=mean(mortrate), semmortrate=sd(mortrate/(sqrt(30)))))
+```
+
 ## pCO2
 
 Differences in mortality were observed across ploidies and pH treatments. 250 mortalities were observed over the course of this experiment (@tbl-mortalties_pH; ). We analysed mortality using the survival package in R. 
@@ -1097,6 +1219,13 @@ survival_eventdat_pH <- merge(survival_eventdat_pH,pH_tanktrt, by = "Tank")
 kable(survival_eventdat_pH %>% filter(Time <= 28) %>% group_by(Colour, CO2_level) %>% summarise(sum=sum(event)))
 ```
 
+```{r}
+ph_mortdat_expanded <- merge(ph_mortdat_expanded, pH_tanktrt)
+ph_mortdat_expanded$mortrate <- (15-ph_mortdat_expanded$Survivors_Nov_25)/15*100
+kable(ph_mortdat_expanded %>% select(Tank, Colour, CO2_level , mortrate) %>% group_by(Colour, CO2_level) %>% summarise(meanmort=mean(mortrate), semmortrate=sd(mortrate/(sqrt(30)))))
+```
+
+
 ```{r, echo=FALSE}
 #| label: fig-mortalties_pH
 #| fig-cap: "Kaplan meyer survival plot of individuals from pH experiment in this study"
@@ -1155,16 +1284,79 @@ K2_pH <- coxph(surv_pH ~ Colour , data = survival_eventdat_pH)
 K3_pH <- coxph(surv_pH ~ Colour + CO2_level, data = survival_eventdat_pH)
 K4_pH <- coxph(surv_pH ~ Colour * CO2_level, data = survival_eventdat_pH)
 
+
 summary(K1_pH)
 summary(K2_pH)
 summary(K3_pH)
 summary(K4_pH)
 anova(K4_pH)
-#survminer::pairwise_survdiff(Surv(Date, event, type = "right"), data = survival_eventdat_pH)
-ggforest(K4_pH)#visualise the data
+
+#pairwise comparisons for the pooled model
+#survfit(K4_pH, newdata = survival_eventdat_pH)
+
+#ggforest(K4_pH, data = survival_eventdat_pH)#visualise the data
+
 ```
 
-In oprder to account for variation in mortality between tanks we performed a frailty analysis. This frailty analysis was akin to using a linear mixed model to analyse the data. 
+In order to account for variation in mortality between tanks we performed a frailty analysis. This frailty analysis was akin to using a linear mixed model to analyse the data. 
+
+#### Comparisons of two methods to include fixed effects. 
+
+The frailtyEM pacakage (REFERNCE) allows you to add a frailty (i.e. random) effect to the survival analyses. The coxme Package [Therneau, 2024](https://cran.r-project.org/web/packages/coxme/index.html) also allows you to add a random effect to the data, this package however allows you to use the same coxph model that you would use for pooled analysis. Pairwise comparisons for the coxme object can be done using the emmeans package [Lenth et al 2024](https://cran.r-project.org/web/packages/emmeans/). The emmeans package allows for corrections for pairwise comparisons. 
+<Br>
+##### Coxme package
+
+The coxme package is probably easier to use. Comparisons of the coxph model that included the random effects model indicate that it is significantly more parisomoniuos than the model that includes only fixed effects(@tbl-coxme_coxph_comparison). The pairwise comparisons within ploidy, but across treatments treatments (@tbl-pairs_ploidy_tukey) indicated that diploids (blue) exhibited higher mortality at 1000 than 500 µatm above ambient. No other significant pairwise comaprisons existed. <Br>
+Pairwise comparisons across ploidies, within treatments (@tbl-pairs_CO2_tukey) showed that at 500 and 750 µatm above ambient mated triploids (green) had higher mortality than both induced triploids (red) and diploids (blue). Suggesting that mated triploids were more sensitive at lower pH's
+
+```{r}
+K5_pH <- coxme(surv_pH ~ Colour * CO2_level+ (1|Tank), data = survival_eventdat_pH)
+
+pairwise_K5_pH <- emmeans(K5_pH, ~ Colour*CO2_level)
+pairs_ploidy <- pairs(pairwise_K5_pH, simple = "CO2_level", adjust = "Tukey")
+pairs_CO2 <- pairs(pairwise_K5_pH, simple = "Colour", adjust = "Tukey")
+```
+
+
+```{r, echo=FALSE}
+#| label: tbl-coxme_coxph_comparison
+#| tbl-cap: "Comparison of the cox propoortional hazards model that included only fixed effects (K4) and that which included random effects (K5)"
+#| warning: false
+
+kable(anova(K4_pH, K5_pH))
+```
+
+```{r, echo=FALSE}
+#| label: tbl-coxme_anova
+#| tbl-cap: "Anlalysis of deviance table from the mixed effects cox proportaional hazard model"
+#| warning: false
+
+kable(Anova(K5_pH))
+```
+The analysis of deviance table for the cox mixed effects model indiacted that there was a sognificant interaction between colour and co2 level on survival. Thus we performed pariwse analyses. 
+
+
+
+```{r, echo=FALSE}
+#| label: tbl-pairs_ploidy_tukey
+#| tbl-cap: "Pairwise contrasts within ploidy"
+#| warning: false
+
+kable(pairs_ploidy)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-pairs_CO2_tukey
+#| tbl-cap: "Pairwise contrasts within ploidy"
+#| warning: false
+
+kable(pairs_CO2)
+```
+
+
+##### EMfrail package
+
+The EMfrail package is slightly more complicated and does not have an easy pairwose comparison to make. But we will go through it anyway.This also uses lots more computer time because we need to relevel the data using a loop. It also does not allow us to ciorrect for multiple comparisons. 
 
 In the pooled mixed effects hazard model, the chamber random effect was found to significantly contribute to the variability in survival and therefore the mixed effects model was used for the population and maternal comparision analysis (Commenges-Andersen p = 1.7^{-10}; LRT p = 1.2^{-12}). 
 
@@ -1183,7 +1375,8 @@ ca_pval <- summary(pH_frailty_fit)$ca_test["pval"]
 lrt_pval <- summary(pH_frailty_fit)$loglik["pval"]
 ```
 
-Because there was a significant effect of mortality I need to do pairwise comparisons to understand exactly which treatments differ from one another. To do this I will need to re level the data so that everything is compared against everything else as the base level. a for loop will do this for all the data 
+Pairwise compairons were then done to determine which ploidy treatment combinations differed from each other. This requires releveling the data so that there is a baseline comparison for each of the comaparisons. <Br> Only the significant pairwise comapriosn were saved (@tbl-pairwise_surv_pH_frail). <Br> Pairwise compariosns indivated that within treatments but across ploidies mortality was higher in mated triploids (green) than in diploids and at 500 and 750 mated triploids had significantly higher mortality than diploids and induced triploids. Across treatments but within ploidies indicated that in mated triploids mortality was significantly higher at 500 and 750 than at 250 µatm. In diploids mprtality was significantly higher at 1000 µatm above ambient relative to all other treatment levels. <Br>
+There are moer significant pairwise comparisons when we use the emfrail package, which I think is due to the fact that there are no corrections for multiple pairwise comparisons. This is supported by the fact that when we do not include a pairwise adjustment we observe these same differences using the coxme and emmeans packages (@)
 
 ```{r, results='hide'}
 #First thing I want to do is get reference levels.
@@ -1201,7 +1394,7 @@ Because there was a significant effect of mortality I need to do pairwise compar
 #    emfrail(Surv(Time, event, type = "right") ~ CO2_level*Colour + cluster(Tank), 
 #                                                     distribution = emfrail_dist(dist = "gamma"), data = .) %>%
 #   {.}
-#This for loop may change the order automatically and save yje result with the name pattern
+#This for loop may change the order automatically and save the result with the name pattern
 # Define the levels of CO2_Level
 CO2_levels <- c("0", "250", "500", "750", "1000")
 # Define the levels of Colour
@@ -1274,13 +1467,38 @@ sig_pairwise_diffs_survival_pCO2 <- sig_pairwise_diffs_survival_pCO2 %>%
 
 ```
 
+
 Pairwise comparisons 
 
 ```{r, echo=FALSE}
-#| label: tbl-pairwise_surv_pH
+#| label: tbl-pairwise_surv_pH_frail
 #| tbl-cap: "Signifcant pairwise differences in survival from the frailty survival fit"
 #| warning: false
 
 kable(sig_pairwise_diffs_survival_pCO2, row.names = FALSE)
+```
+
+```{r, echo=FALSE}
+#| label: tbl-pairwise_surv_pHploidy_noadj
+#| tbl-cap: "Signifcant pairwise differences in survival across treatment levels with no correction for multuiple comparisons"
+#| warning: false
+
+pairwise_K5_pH_noadj <- emmeans(pairwise_K5_pH, ~ Colour:CO2_level, adjust="none")
+
+kable(pairs(pairwise_K5_pH_noadj, simple = "CO2_level", adjust = "none"))
+```
+
+```{r, echo=FALSE}
+#| label: tbl-pairwise_surv_pHCO2_noadj
+#| tbl-cap: "Signifcant pairwise differences in survival across ploidies levels with no correction for multuiple comparisons"
+#| warning: false
+
+kable(pairs(pairwise_K5_pH_noadj, simple = "Colour", adjust = "none"))
+```
+
+```{r}
+pairwise_K5_pH <- emmeans(pairwise_K5_pH, ~ Colour:CO2_level, adjust="none")
+pairs_ploidy <- pairs(pairwise_K5_pH, simple = "CO2_level", adjust = "none")
+pairs_CO2 <- pairs(pairwise_K5_pH, simple = "Colour", adjust = "none")
 ```
 
